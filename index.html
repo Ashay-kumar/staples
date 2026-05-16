@@ -3,459 +3,1330 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Staples Sales Dashboard — J24 Stores</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<title>J24 Retail Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #ffffff; --bg2: #f5f5f3; --bg3: #eeeee9;
-    --text: #1a1a18; --text2: #6b6b65; --text3: #9e9e98;
-    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
-    --info-bg: #e6f1fb; --info-text: #0c447c; --info-border: #185fa5;
-    --success-bg: #eaf3de; --success-text: #27500a;
-    --warn-bg: #faeeda; --warn-text: #633806;
-    --danger-bg: #fcebeb; --danger-text: #791f1f;
-    --radius: 8px; --radius-lg: 12px;
-    --red: #A32D2D; --amber: #BA7517; --green: #3B6D11; --gray: #888780;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
-      --text: #e8e8e2; --text2: #a0a09a; --text3: #6a6a65;
-      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
-      --info-bg: #042c53; --info-text: #85b7eb; --info-border: #185fa5;
-      --success-bg: #173404; --success-text: #c0dd97;
-      --warn-bg: #412402; --warn-text: #fac775;
-      --danger-bg: #501313; --danger-text: #f09595;
-      --red: #f09595; --amber: #fac775; --green: #97c459; --gray: #b4b2a9;
-    }
-  }
-  html { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; background: var(--bg3); color: var(--text); }
-  body { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 3rem; background: var(--bg3); }
+:root {
+  --bg: #0f1117; --bg2: #181c27; --bg3: #1e2335; --bg4: #252b40;
+  --text: #e8eaf0; --text2: #8b92a8; --text3: #555e7a;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+  --red: #e05252; --amber: #e09a3c; --green: #4caf7d; --blue: #5b8dee;
+  --red-bg: rgba(224,82,82,0.1); --amber-bg: rgba(224,154,60,0.1);
+  --green-bg: rgba(76,175,125,0.1); --blue-bg: rgba(91,141,238,0.1);
+  --radius: 10px; --radius-lg: 14px; --radius-xl: 20px;
+  --font: 'DM Sans', sans-serif; --mono: 'DM Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-family:var(--font);font-size:14px;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background:var(--bg)}
 
-  h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
-  .subtitle { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; }
-  .sec-label { font-size: 10px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); margin-bottom: .6rem; }
-  .section { margin-bottom: 2rem; }
+/* LOGIN SCREEN */
+#loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:2rem}
+.login-logo{font-size:28px;font-weight:600;letter-spacing:-.5px;margin-bottom:6px;color:var(--text)}
+.login-logo span{color:var(--blue)}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:2.5rem}
+.login-card{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-xl);padding:2rem;width:100%;max-width:380px}
+.login-step{display:none}
+.login-step.active{display:block}
+.step-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.75rem}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.role-btn{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 12px;cursor:pointer;text-align:left;transition:all .15s}
+.role-btn:hover{border-color:var(--blue);background:var(--blue-bg)}
+.role-btn.selected{border-color:var(--blue);background:var(--blue-bg)}
+.rb-icon{font-size:20px;margin-bottom:8px}
+.rb-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.rb-sub{font-size:11px;color:var(--text2)}
+.login-input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--text);font-family:var(--font);margin-bottom:10px;outline:none}
+.login-input:focus{border-color:var(--blue)}
+.login-input option{background:var(--bg3)}
+.login-btn{width:100%;background:var(--blue);border:none;border-radius:var(--radius);padding:11px;font-size:13px;font-weight:500;color:#fff;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.login-btn:hover{opacity:.9}
+.login-btn:disabled{opacity:.4;cursor:not-allowed}
+.back-link{font-size:12px;color:var(--text2);cursor:pointer;margin-top:.75rem;display:inline-block}
+.back-link:hover{color:var(--text)}
+.login-error{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
 
-  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
-  .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.5rem; }
-  .met { background: var(--bg2); border-radius: var(--radius); padding: 12px 14px; }
-  .met-l { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
-  .met-v { font-size: 20px; font-weight: 500; }
+/* APP SHELL */
+#app{display:none;min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg2);border-right:0.5px solid var(--border);padding:1.25rem 0;display:flex;flex-direction:column;z-index:100}
+.sidebar-logo{padding:0 1.25rem 1.25rem;font-size:16px;font-weight:600;color:var(--text);letter-spacing:-.3px;border-bottom:0.5px solid var(--border)}
+.sidebar-logo span{color:var(--blue)}
+.sidebar-user{padding:.75rem 1.25rem;border-bottom:0.5px solid var(--border);margin-bottom:.5rem}
+.su-role{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:2px}
+.su-name{font-size:13px;font-weight:500;color:var(--text)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 1.25rem;font-size:13px;color:var(--text2);cursor:pointer;border-radius:0;transition:all .1s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--blue);background:rgba(91,141,238,0.08);border-left-color:var(--blue)}
+.nav-item i{font-size:16px;flex-shrink:0}
+.nav-section{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:.75rem 1.25rem .25rem;margin-top:.25rem}
+.sidebar-bottom{margin-top:auto;padding:1rem 1.25rem;border-top:0.5px solid var(--border)}
+.logout-btn{font-size:12px;color:var(--text3);cursor:pointer;display:flex;align-items:center;gap:6px}
+.logout-btn:hover{color:var(--text2)}
+.main{margin-left:220px;padding:1.5rem 1.75rem;min-height:100vh}
+.page{display:none}
+.page.active{display:block}
+.page-title{font-size:20px;font-weight:600;letter-spacing:-.3px;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text2);margin-bottom:1.5rem}
 
-  .funnel { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0; margin-bottom: 1rem; }
-  .fstep { border: 0.5px solid var(--border); padding: 12px 14px; background: var(--bg); cursor: pointer; }
-  .fstep:first-child { border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
-  .fstep:last-child { border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
-  .fstep + .fstep { border-left: none; }
-  .fstep:hover { background: var(--bg2); }
-  .fstep.active { background: var(--info-bg); border-color: var(--info-border); }
-  .fstep-icon { font-size: 18px; margin-bottom: 6px; color: var(--text2); }
-  .fstep.active .fstep-icon { color: var(--info-text); }
-  .fstep-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
-  .fstep-sub { font-size: 11px; color: var(--text2); }
-  .fstep.active .fstep-sub { color: var(--info-text); }
+/* COMPONENTS */
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem}
+.card-title{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.75rem}
+.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.met-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem}
+.met-label{font-size:11px;color:var(--text2);margin-bottom:5px}
+.met-val{font-size:22px;font-weight:600;letter-spacing:-.5px}
+.met-chg{font-size:12px;margin-top:3px}
+.chg-up{color:var(--green)}
+.chg-down{color:var(--red)}
+.chg-flat{color:var(--text2)}
+.divider{height:0.5px;background:var(--border);margin:1.25rem 0}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;white-space:nowrap}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-gray{background:rgba(255,255,255,0.06);color:var(--text2)}
+.section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:.6rem}
 
-  .stage-panel { display: none; }
-  .stage-panel.visible { display: block; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .three-col { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+/* STORE CARDS */
+.store-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.store-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:all .15s}
+.store-card:hover{border-color:var(--border2);background:var(--bg3)}
+.store-card.critical{border-left:3px solid var(--red)}
+.store-card.at-risk{border-left:3px solid var(--amber)}
+.store-card.stable{border-left:3px solid var(--green)}
+.store-card.moderate{border-left:3px solid var(--text3)}
+.sc-name{font-size:12px;font-weight:500;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-stats{display:flex;gap:8px;font-size:11px;color:var(--text2)}
+.sc-bar{height:3px;border-radius:2px;background:var(--bg4);margin-top:6px}
+.sc-bar-fill{height:3px;border-radius:2px}
+.sc-action{font-size:10px;color:var(--blue);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-  .signal-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
-  .signal-row:last-child { border-bottom: none; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-  .dot-red { background: var(--red); }
-  .dot-amber { background: var(--amber); }
-  .dot-green { background: var(--green); }
-  .sig-text { font-size: 13px; line-height: 1.5; flex: 1; }
-  .sig-label { font-size: 11px; color: var(--text3); margin-top: 1px; }
+/* TASK SYSTEM */
+.task-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border)}
+.task-row:last-child{border-bottom:none}
+.task-priority{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.p1-dot{background:var(--red)}
+.p2-dot{background:var(--amber)}
+.p3-dot{background:var(--green)}
+.task-body{flex:1}
+.task-store{font-size:11px;color:var(--text2);margin-bottom:2px}
+.task-desc{font-size:13px;font-weight:400;line-height:1.5;margin-bottom:4px}
+.task-meta{font-size:11px;color:var(--text3);display:flex;gap:10px;flex-wrap:wrap}
+.task-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.btn-sm{font-size:11px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:var(--font)}
+.btn-sm:hover{background:var(--bg4);color:var(--text)}
+.btn-sm.primary{background:var(--blue);color:#fff;border-color:transparent}
+.btn-sm.primary:hover{opacity:.9}
+.btn-sm.danger{background:var(--red-bg);color:var(--red);border-color:transparent}
+.empty-state{text-align:center;padding:2.5rem;color:var(--text3);font-size:13px}
 
-  .good-bad { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-xl);padding:1.5rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--text2);margin-bottom:1.25rem}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:5px;display:block}
+.form-input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:var(--font);outline:none}
+.form-input:focus{border-color:var(--blue)}
+.form-input option{background:var(--bg3)}
+textarea.form-input{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem}
+.btn{padding:8px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-family:var(--font)}
+.btn:hover{background:var(--bg4)}
+.btn.primary{background:var(--blue);color:#fff;border-color:transparent}
+.btn.primary:hover{opacity:.9}
+.btn.primary:disabled{opacity:.4;cursor:not-allowed}
 
-  .priority-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
-  .priority-item:last-child { border-bottom: none; }
-  .rank { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; margin-top: 1px; }
-  .r1,.r2 { background: var(--danger-bg); color: var(--danger-text); }
-  .r3,.r4 { background: var(--warn-bg); color: var(--warn-text); }
-  .r5,.r6 { background: var(--success-bg); color: var(--success-text); }
-  .pi-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
-  .pi-desc { font-size: 12px; color: var(--text2); line-height: 1.55; }
-  .pi-meta { font-size: 11px; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
-  .tag { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 3px; }
-  .tag-red { background: var(--danger-bg); color: var(--danger-text); }
-  .tag-amber { background: var(--warn-bg); color: var(--warn-text); }
-  .tag-green { background: var(--success-bg); color: var(--success-text); }
-  .tag-blue { background: var(--info-bg); color: var(--info-text); }
-  .week-badge { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 500; margin-left: 5px; vertical-align: middle; }
-  .w1 { background: var(--danger-bg); color: var(--danger-text); }
-  .w2 { background: var(--warn-bg); color: var(--warn-text); }
-  .w3 { background: var(--success-bg); color: var(--success-text); }
+/* TABS */
+.tab-nav{display:flex;gap:4px;margin-bottom:1.25rem;border-bottom:0.5px solid var(--border);padding-bottom:.5rem}
+.tab-btn{font-size:13px;padding:5px 14px;border-radius:6px;background:transparent;border:none;color:var(--text2);cursor:pointer;font-family:var(--font)}
+.tab-btn:hover{color:var(--text);background:var(--bg3)}
+.tab-btn.active{color:var(--blue);background:var(--blue-bg)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
-  .filter-btns { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-  .filter-btns button { font-size: 12px; padding: 5px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); cursor: pointer; }
-  .filter-btns button:hover { background: var(--bg2); }
-  .filter-btns button.active { background: var(--info-bg); color: var(--info-text); border-color: var(--info-border); }
+/* REMARKS */
+.remark-card{background:var(--bg3);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;border:0.5px solid var(--border)}
+.rc-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.rc-name{font-size:12px;font-weight:500}
+.rc-ctx{font-size:11px;color:var(--text2)}
+.rc-time{font-size:11px;color:var(--text3);margin-left:auto}
+.rc-text{font-size:13px;line-height:1.5;margin-bottom:8px}
+.rc-response{background:var(--bg4);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text2);border-left:2px solid var(--blue)}
+.rc-response-label{font-size:10px;color:var(--blue);margin-bottom:3px;font-weight:500}
 
-  .store-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
-  .sg-card { background: var(--bg2); border-radius: var(--radius); padding: 10px 12px; }
-  .sg-name { font-size: 12px; font-weight: 500; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .sg-stats { display: flex; gap: 10px; font-size: 11px; color: var(--text2); }
-  .bar-mini { height: 4px; border-radius: 2px; background: var(--bg3); margin-top: 5px; }
-  .bar-fill { height: 4px; border-radius: 2px; }
+/* HEATMAP */
+.heatmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:4px}
+.hm-cell{border-radius:6px;padding:8px 10px;cursor:pointer;transition:opacity .1s}
+.hm-cell:hover{opacity:.8}
+.hm-name{font-size:10px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hm-val{font-size:11px;margin-top:2px}
 
-  .divider { height: 0.5px; background: var(--border); margin: 1rem 0; }
-  .chart-wrap { position: relative; width: 100%; }
-  .store-note { font-size: 11px; color: var(--text3); margin-top: 8px; }
+/* WATERFALL CHART */
+.wf-bars{display:flex;align-items:flex-end;gap:4px;height:160px;padding:0 4px}
+.wf-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.wf-bar{width:100%;border-radius:4px 4px 0 0;transition:height .3s}
+.wf-label{font-size:9px;color:var(--text3);text-align:center;line-height:1.3}
+.wf-val{font-size:10px;font-weight:500;text-align:center}
 
-  .updated-tag { font-size: 11px; color: var(--text3); float: right; margin-top: 4px; }
+/* INVESTOR LEVEL BADGES */
+.l1{background:rgba(91,141,238,0.2);color:var(--blue)}
+.l2{background:rgba(76,175,125,0.2);color:var(--green)}
+.l3{background:rgba(224,154,60,0.2);color:var(--amber)}
 
-  @media (max-width: 600px) {
-    .metrics { grid-template-columns: repeat(2, 1fr); }
-    .funnel { grid-template-columns: repeat(2, 1fr); }
-    .fstep:nth-child(2) { border-left: 0.5px solid var(--border); }
-    .fstep:nth-child(3) { border-top: none; }
-    .fstep:nth-child(1) { border-radius: var(--radius-lg) 0 0 0; }
-    .fstep:nth-child(2) { border-radius: 0 var(--radius-lg) 0 0; }
-    .fstep:nth-child(3) { border-radius: 0 0 0 var(--radius-lg); }
-    .fstep:nth-child(4) { border-radius: 0 0 var(--radius-lg) 0; }
-    .two-col, .good-bad { grid-template-columns: 1fr; }
-    .three-col { grid-template-columns: 1fr; }
-    .store-grid { grid-template-columns: 1fr; }
-  }
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{width:100%;height:auto;bottom:auto;position:fixed;top:0;flex-direction:row;align-items:center;padding:.5rem 1rem;border-right:none;border-bottom:0.5px solid var(--border);overflow-x:auto}
+  .sidebar-logo{padding:0 1rem 0 0;border-bottom:none;font-size:14px}
+  .sidebar-user{display:none}
+  .nav-item{padding:6px 10px;font-size:12px;border-left:none;border-bottom:2px solid transparent;white-space:nowrap}
+  .nav-item.active{border-left-color:transparent;border-bottom-color:var(--blue)}
+  .nav-section,.sidebar-bottom{display:none}
+  .main{margin-left:0;margin-top:48px;padding:1rem}
+  .grid-4,.grid-3{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
 
-<h1>Staples store dashboard</h1>
-<div class="subtitle">
-  J24 network · Bengaluru · GPS (sales) &amp; GPT (bills) · Apr → May 2026
-  <span class="updated-tag">Last updated: May 16, 2026</span>
-</div>
-
-<div class="section">
-  <div class="sec-label">What is happening — Apr to May MTD</div>
-  <div class="metrics">
-    <div class="met"><div class="met-l">Network GPS drop</div><div class="met-v" style="color:var(--red)">−39%</div></div>
-    <div class="met"><div class="met-l">Bill count drop</div><div class="met-v" style="color:var(--red)">−45%</div></div>
-    <div class="met"><div class="met-l">Avg basket (ATV)</div><div class="met-v" style="color:var(--green)">+10%</div></div>
-    <div class="met"><div class="met-l">Stores in degrowth</div><div class="met-v">62 / 62</div></div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="sec-label">Customer journey — where the fall begins (click each stage)</div>
-  <div class="funnel">
-    <div class="fstep active" id="fs0" onclick="showStage(0)">
-      <div class="fstep-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
-      <div class="fstep-title">Customer visits</div>
-      <div class="fstep-sub">Bills down −45%</div>
-    </div>
-    <div class="fstep" id="fs1" onclick="showStage(1)">
-      <div class="fstep-icon"><i class="ti ti-shopping-cart" aria-hidden="true"></i></div>
-      <div class="fstep-title">Cart size</div>
-      <div class="fstep-sub">ATV up +10%</div>
-    </div>
-    <div class="fstep" id="fs2" onclick="showStage(2)">
-      <div class="fstep-icon"><i class="ti ti-package" aria-hidden="true"></i></div>
-      <div class="fstep-title">Category choice</div>
-      <div class="fstep-sub">Rice −34%, Spices −46%</div>
-    </div>
-    <div class="fstep" id="fs3" onclick="showStage(3)">
-      <div class="fstep-icon"><i class="ti ti-repeat" aria-hidden="true"></i></div>
-      <div class="fstep-title">Repeat behaviour</div>
-      <div class="fstep-sub">Frequency falling</div>
-    </div>
-  </div>
-
-  <div class="card stage-panel visible" id="stage0">
-    <div class="two-col">
-      <div>
-        <div style="font-size:13px;font-weight:500;margin-bottom:10px">What the data says</div>
-        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Bill count dropped 45% network-wide Apr→May. Every single store lost footfall.</div><div class="sig-label">Strongest signal in the data</div></div></div>
-        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">May is only half-done (data to May 16). Even at full-month pace, degrowth is structural vs Mar peak of ₹81.8L.</div><div class="sig-label">Apr ₹71.1L → May run-rate ~₹55L</div></div></div>
-        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">5 new stores only exist in May — pulling Apr baseline down artificially in comparison.</div><div class="sig-label">Arushi, Kashvi, One9, Prime, S R G Honkan, Santhosh</div></div></div>
-        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Customers who do visit are spending 10% more per trip — loyalty is intact, this is a frequency problem not a preference problem.</div><div class="sig-label">ATV up from ₹68 → ₹75 avg</div></div></div>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:500;margin-bottom:10px">Why footfall fell</div>
-        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Seasonality: May is a low-stocking month. Consumers buy less rice, atta, dal in summer — they run through stocks slower.</div><div class="sig-label">Explains ~50–60% of the drop</div></div></div>
-        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Month-to-date effect: May 16 is day 16 of 31. A flat month would still show ~48% of April at this point.</div><div class="sig-label">Baseline math — not all "drop" is real yet</div></div></div>
-        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Some stores show sudden collapse — Shiva Ganga −77%, Sathish −60% — suggesting local disruption: stock outage, operational issue, or new competitor.</div><div class="sig-label">Needs store-level investigation</div></div></div>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-logo">J24 <span>Retail Intelligence</span></div>
+  <div class="login-sub">Bengaluru Store Network · Operational Platform</div>
+  <div class="login-card">
+    <!-- Step 1: Choose role -->
+    <div class="login-step active" id="step1">
+      <div class="step-label">Who are you?</div>
+      <div class="role-grid">
+        <button class="role-btn" onclick="selectRole('founder')" id="role-founder">
+          <div class="rb-icon">👑</div>
+          <div class="rb-title">Founder</div>
+          <div class="rb-sub">Full network view</div>
+        </button>
+        <button class="role-btn" onclick="selectRole('gm')" id="role-gm">
+          <div class="rb-icon">🏢</div>
+          <div class="rb-title">GM</div>
+          <div class="rb-sub">Cluster manager</div>
+        </button>
+        <button class="role-btn" onclick="selectRole('ge')" id="role-ge">
+          <div class="rb-icon">🏪</div>
+          <div class="rb-title">GE</div>
+          <div class="rb-sub">Ground executive</div>
+        </button>
+        <button class="role-btn" onclick="selectRole('investor')" id="role-investor">
+          <div class="rb-icon">📊</div>
+          <div class="rb-title">Investor</div>
+          <div class="rb-sub">Executive view</div>
+        </button>
       </div>
     </div>
-  </div>
 
-  <div class="card stage-panel" id="stage1">
-    <div class="two-col">
-      <div>
-        <div style="font-size:13px;font-weight:500;margin-bottom:10px">What the data says</div>
-        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Average transaction value rose +10% network-wide — from ₹68/bill in April to ₹75/bill in May.</div><div class="sig-label">Positive signal: loyal customers spend more</div></div></div>
-        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">17 stores show ATV up more than 10%: Gajanana (+38%), Purva Riviera (+33%), KSFC Layout (+16%), Victorian View (+19%).</div><div class="sig-label">These stores are upselling effectively</div></div></div>
-        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">6 stores show ATV falling too — Shiva Ganga −62%, Shree Lakshmi −34%, Sri Mahadeshwara −28%. Both footfall AND spend collapsing.</div><div class="sig-label">Double stress — requires urgent attention</div></div></div>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:500;margin-bottom:10px">What this means for customers</div>
-        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Customers who return are buying slightly larger quantities or bigger pack sizes. This is a healthy sign of trust in the store.</div></div></div>
-        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Rising ATV partly masks the frequency loss — GPS looks less bad than the bill count suggests. Don't be complacent about this.</div></div></div>
-        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">For double-stress stores, even returning customers are buying less — suggests assortment gap, pricing concern, or poor experience.</div></div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card stage-panel" id="stage2">
-    <div style="font-size:13px;font-weight:500;margin-bottom:10px">GPS drop by category — contribution to total ₹28L degrowth</div>
-    <div class="chart-wrap" style="height:240px">
-      <canvas id="catChart" role="img" aria-label="Horizontal bar chart of GPS drop by category">Rice ₹10L, Spices ₹5L, Pulses ₹4L, Flours ₹3.5L, Sugar ₹2.1L, Dry Fruits ₹1.4L, Whole Spices ₹1.1L, Salt ₹0.9L</canvas>
-    </div>
-    <div class="divider"></div>
-    <div class="three-col" style="margin-top:8px">
-      <div><div style="font-size:12px;font-weight:500;margin-bottom:5px;color:var(--red)">High alarm</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Rice −34% GPS<br>Spices −46%<br>= 53% of all lost revenue</div></div>
-      <div><div style="font-size:12px;font-weight:500;margin-bottom:5px;color:var(--amber)">Watch</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Pulses −40%<br>Flours −42%<br>= 31% of all lost revenue</div></div>
-      <div><div style="font-size:12px;font-weight:500;margin-bottom:5px;color:var(--green)">Stable-ish</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Whole Grains −19%<br>Holding better than others<br>Small base though</div></div>
-    </div>
-  </div>
-
-  <div class="card stage-panel" id="stage3">
-    <div class="two-col">
-      <div>
-        <div style="font-size:13px;font-weight:500;margin-bottom:10px">Repeat customer signals</div>
-        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Bill frequency per store is down ~45% — customers who typically ordered 2–3x/month may have ordered once in May so far.</div></div></div>
-        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Staples are monthly/bi-monthly purchases. Some of the May drop is "not yet re-ordered" — some will return later in the month.</div></div></div>
-        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Stores with high ATV and moderate bill drop (Gajanana, JHBCS, Sai Sakshik) suggest their loyal customers are still active, just buying less often.</div></div></div>
-        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Stores with both bill drop AND ATV drop risk losing customers permanently — they may be switching to a competitor or modern retail.</div></div></div>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:500;margin-bottom:10px">Retention risk by pattern</div>
-        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">At-risk stores: Shiva Ganga, Sathish, Nanjundeshwara — bill count and spend both collapsing. Customers may be churning.</div><div class="sig-label">Needs immediate re-engagement</div></div></div>
-        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Frequency dip stores: most of the network — customers taking longer gap between orders due to seasonality. Win-back campaigns will work here.</div><div class="sig-label">~45 stores in this bucket</div></div></div>
-        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Stable base stores: Gajanana, Suvarna, Sai Sakshik — holding loyalty, ATV growing. Protect these and learn from them.</div><div class="sig-label">Double down on retention here</div></div></div>
-      </div>
+    <!-- Step 2: Choose name -->
+    <div class="login-step" id="step2">
+      <div class="step-label" id="step2Label">Select your name</div>
+      <div class="login-error" id="loginError">Name not recognised. Please try again.</div>
+      <select class="login-input" id="nameSelect" style="display:none"></select>
+      <input class="login-input" id="nameInput" type="text" placeholder="Enter your access code" style="display:none">
+      <button class="login-btn" id="loginBtn" onclick="doLogin()" disabled>Enter Dashboard</button>
+      <div class="back-link" onclick="goBackStep()">← Change role</div>
     </div>
   </div>
 </div>
 
-<div class="section">
-  <div class="sec-label">What is good vs what is not</div>
-  <div class="good-bad">
-    <div class="card">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><i class="ti ti-circle-check" style="color:var(--green);font-size:16px" aria-hidden="true"></i><span style="font-size:13px;font-weight:500">Working well</span></div>
-      <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Basket size is up — loyal customers trust the assortment and are buying more per trip</div></div></div>
-      <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Gajanana, Suvarna, Sai Sakshik holding GPS decline to &lt;37% while others bleed 50–77%</div></div></div>
-      <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">5 new stores onboarded in May — network is still growing</div></div></div>
-      <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">JHBCS and Neeladri Road are large stores holding ATV stable — strong anchor customer base</div></div></div>
+<!-- MAIN APP -->
+<div id="app">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">J24 <span>Retail</span></div>
+    <div class="sidebar-user">
+      <div class="su-role" id="sidebarRole"></div>
+      <div class="su-name" id="sidebarName"></div>
     </div>
-    <div class="card">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><i class="ti ti-alert-triangle" style="color:var(--red);font-size:16px" aria-hidden="true"></i><span style="font-size:13px;font-weight:500">Needs fixing</span></div>
-      <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">6 stores losing both footfall AND basket size — double stress, churn risk is real</div></div></div>
-      <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Rice alone = ₹10L of ₹28L total drop. No category-specific retention plan visible</div></div></div>
-      <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Stores like Sri Siddappaji saw Apr drop 46% vs Mar — already weak before May started</div></div></div>
-      <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">No store shows growth — even best performers are just "less bad". No outlier pulling the network up</div></div></div>
+    <div id="sidebarNav"></div>
+    <div class="sidebar-bottom">
+      <div class="logout-btn" onclick="logout()">⬅ Sign out</div>
+    </div>
+  </div>
+  <div class="main" id="mainContent"></div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-overlay" id="taskModal" onclick="closeTaskModal(event)">
+  <div class="modal">
+    <div class="modal-title">Assign Task</div>
+    <div class="modal-sub" id="taskModalStore"></div>
+    <div class="form-group">
+      <label class="form-label">Problem type</label>
+      <select class="form-input" id="taskProblem">
+        <option value="Footfall issue">Footfall issue — bills dropping</option>
+        <option value="Basket issue">Basket issue — ATV dropping</option>
+        <option value="Double stress">Double stress — both falling</option>
+        <option value="Category failure">Category failure — specific category down</option>
+        <option value="Stock check">Stock check</option>
+        <option value="General">General action</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Priority</label>
+      <select class="form-input" id="taskPriority">
+        <option value="P1">P1 — Today (critical)</option>
+        <option value="P2">P2 — This week</option>
+        <option value="P3">P3 — Next week</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Task description — what the GE needs to do</label>
+      <textarea class="form-input" id="taskDesc" placeholder="e.g. Visit store, check rice stock levels, confirm with store manager why GPS dropped 40% this period, take photo of shelf..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="document.getElementById('taskModal').classList.remove('open')">Cancel</button>
+      <button class="btn primary" id="assignBtn" onclick="assignTask()">Assign Task</button>
     </div>
   </div>
 </div>
 
-<div class="section">
-  <div class="sec-label">Problems to tackle — customer-first priority order</div>
-  <div class="card">
-
-    <div class="priority-item">
-      <div class="rank r1">1</div>
-      <div>
-        <div class="pi-title">Stop the bleed at 6 double-stress stores <span class="week-badge w1">This week</span></div>
-        <div class="pi-desc">Shiva Ganga (−77%), Sathish (−60%), Nanjundeshwara (−60%), Rishan (−59%), Sri RAGHAVENDRA (−58%), Sri Krishnagururaya (−57%) are losing both visits AND spend. These customers are leaving, not just pausing.</div>
-        <div class="pi-meta"><span class="tag tag-red">Churn risk</span><span class="tag tag-red">₹4.8L combined Apr GPS</span><span class="tag tag-blue">Action: WhatsApp reactivation + combo deal today</span></div>
-      </div>
+<!-- UPDATE TASK MODAL -->
+<div class="modal-overlay" id="updateModal" onclick="closeUpdateModal(event)">
+  <div class="modal">
+    <div class="modal-title">Update Task</div>
+    <div class="modal-sub" id="updateModalDesc"></div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select class="form-input" id="updateStatus">
+        <option value="in-progress">In Progress — working on it</option>
+        <option value="done">Done — completed</option>
+        <option value="open">Open — not started</option>
+      </select>
     </div>
-
-    <div class="priority-item">
-      <div class="rank r2">2</div>
-      <div>
-        <div class="pi-title">Fix Rice availability and pricing across all stores <span class="week-badge w1">This week</span></div>
-        <div class="pi-desc">Rice is ₹10L of the ₹28L drop — 35% of all degrowth. At 53 stores, Rice is the single biggest bleeding category. Customers who stop buying rice stop visiting altogether. Verify stock, check if pricing drifted vs local competition.</div>
-        <div class="pi-meta"><span class="tag tag-red">35% of total drop</span><span class="tag tag-amber">Check: stock gaps, price parity</span></div>
-      </div>
+    <div class="form-group">
+      <label class="form-label">Your notes — what did you do?</label>
+      <textarea class="form-input" id="updateComment" placeholder="e.g. Visited store, found rice stock out since 3 days, spoke to manager, order placed for tomorrow delivery..."></textarea>
     </div>
-
-    <div class="priority-item">
-      <div class="rank r3">3</div>
-      <div>
-        <div class="pi-title">Run re-engagement campaign for frequency-lapsed customers <span class="week-badge w2">Week 2</span></div>
-        <div class="pi-desc">45 stores have footfall down 40–60% but ATV is stable or rising — these customers haven't left, they just haven't re-ordered yet. A WhatsApp push or reorder discount will win most of them back this month.</div>
-        <div class="pi-meta"><span class="tag tag-amber">Frequency drop</span><span class="tag tag-blue">~40 stores eligible</span><span class="tag tag-blue">Action: WhatsApp broadcast by store</span></div>
-      </div>
+    <div class="form-group">
+      <label class="form-label">Proof link (optional) — paste Google Drive image link</label>
+      <input class="form-input" type="text" id="updateProof" placeholder="https://drive.google.com/...">
     </div>
-
-    <div class="priority-item">
-      <div class="rank r4">4</div>
-      <div>
-        <div class="pi-title">Build basket with combo packs on Pulses + Flours + Spices <span class="week-badge w2">Week 2</span></div>
-        <div class="pi-desc">Customers who do visit are spending 10% more — they're receptive to buying more per trip. Pulses and Flours together account for ₹7.6L of the drop. A dal+atta combo or masalas bundle deal can recover both categories in one action.</div>
-        <div class="pi-meta"><span class="tag tag-amber">₹7.6L at stake</span><span class="tag tag-blue">Bundle: rice+dal, atta+oil, masala sets</span></div>
-      </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="document.getElementById('updateModal').classList.remove('open')">Cancel</button>
+      <button class="btn primary" id="updateBtn" onclick="submitUpdate()">Save Update</button>
     </div>
-
-    <div class="priority-item">
-      <div class="rank r5">5</div>
-      <div>
-        <div class="pi-title">Identify and protect best-performing stores <span class="week-badge w3">Week 3</span></div>
-        <div class="pi-desc">Gajanana (−27%), Suvarna (−24.5%), Purva Riviera (−31%), Shree Siddhalingeshwara (−31%) are significantly outperforming the network. Understand why — better stock, manager quality, local loyalty — and replicate those practices.</div>
-        <div class="pi-meta"><span class="tag tag-green">Best performers</span><span class="tag tag-blue">Action: store visit + learnings doc</span></div>
-      </div>
-    </div>
-
-    <div class="priority-item">
-      <div class="rank r6">6</div>
-      <div>
-        <div class="pi-title">Set May end-of-month GPS recovery target <span class="week-badge w3">Week 3</span></div>
-        <div class="pi-desc">May MTD (₹43L as of day 16) needs to reach ₹70–75L by May 31 to match April. That means doubling the current pace in the second half. Set store-level targets, track daily, escalate by day 22 if off-track.</div>
-        <div class="pi-meta"><span class="tag tag-green">Planning</span><span class="tag tag-blue">Need ₹27–32L more in 15 days</span></div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<div class="section">
-  <div class="sec-label">Store view — filter by urgency</div>
-  <div class="filter-btns" id="filterBtns">
-    <button onclick="filterStores('critical')" id="fb-critical">Critical (6)</button>
-    <button onclick="filterStores('at-risk')" id="fb-at-risk">High risk (20)</button>
-    <button onclick="filterStores('moderate')" id="fb-moderate">Moderate (30)</button>
-    <button onclick="filterStores('stable')" id="fb-stable">Best performing (4)</button>
+<!-- REMARK MODAL -->
+<div class="modal-overlay" id="remarkModal" onclick="closeRemarkModal(event)">
+  <div class="modal">
+    <div class="modal-title">Leave a Remark</div>
+    <div class="modal-sub" id="remarkModalCtx"></div>
+    <div class="form-group">
+      <label class="form-label">Your remark</label>
+      <textarea class="form-input" id="remarkText" placeholder="e.g. GPS growth looks strong but I'm concerned about ATV trend — is this sustainable?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="document.getElementById('remarkModal').classList.remove('open')">Cancel</button>
+      <button class="btn primary" id="remarkBtn" onclick="submitRemark()">Submit Remark</button>
+    </div>
   </div>
-  <div id="storeGrid"></div>
-  <div class="store-note" id="storeNote"></div>
 </div>
 
 <script>
-const STORES = [
-  {n:"Shiva Ganga",gps:-77.0,gpt:-38.9,atv:-62.4,type:"critical"},
-  {n:"Sathish",gps:-59.9,gpt:-52.1,atv:-16.1,type:"critical"},
-  {n:"Nanjundeshwara",gps:-59.8,gpt:-56.7,atv:-7.3,type:"critical"},
-  {n:"Rishan",gps:-59.4,gpt:-58.4,atv:-2.4,type:"critical"},
-  {n:"Sri RAGHAVENDRA",gps:-58.4,gpt:-54.6,atv:-8.4,type:"critical"},
-  {n:"Sri Krishnagururaya",gps:-57.0,gpt:-54.7,atv:-5.1,type:"critical"},
-  {n:"Aadhya",gps:-56.3,gpt:-57.8,atv:3.6,type:"at-risk"},
-  {n:"Horamavu Nandanam",gps:-56.4,gpt:-51.8,atv:-9.6,type:"at-risk"},
-  {n:"Sogasu",gps:-56.3,gpt:-56.1,atv:-0.6,type:"at-risk"},
-  {n:"Springfields",gps:-56.2,gpt:-49.2,atv:-13.8,type:"at-risk"},
-  {n:"Shree Lakshmi",gps:-54.5,gpt:-31.6,atv:-33.5,type:"at-risk"},
-  {n:"Om Shakthi",gps:-54.5,gpt:-48.0,atv:-12.6,type:"at-risk"},
-  {n:"R G ESSENTIALS",gps:-54.9,gpt:-48.2,atv:-13.1,type:"at-risk"},
-  {n:"Sanju",gps:-54.8,gpt:-45.0,atv:-17.8,type:"at-risk"},
-  {n:"Lashwik",gps:-54.2,gpt:-50.5,atv:-7.4,type:"at-risk"},
-  {n:"Sri Venkateshwara",gps:-53.2,gpt:-54.5,atv:2.8,type:"at-risk"},
-  {n:"SRINIDHI",gps:-53.1,gpt:-47.5,atv:-10.9,type:"at-risk"},
-  {n:"Sri Kala Bhairava",gps:-52.1,gpt:-51.9,atv:-0.4,type:"at-risk"},
-  {n:"Celebrity Paradise",gps:-50.8,gpt:-47.3,atv:-6.6,type:"at-risk"},
-  {n:"Arvind sporcia",gps:-50.7,gpt:-42.4,atv:-14.4,type:"at-risk"},
-  {n:"Sumukha",gps:-51.4,gpt:-56.4,atv:11.4,type:"at-risk"},
-  {n:"Sri Govindalakshmi",gps:-49.6,gpt:-49.8,atv:0.3,type:"at-risk"},
-  {n:"Shri Lakshminarashimha",gps:-49.1,gpt:-48.6,atv:-1.0,type:"at-risk"},
-  {n:"Laxmi Venkateshwara",gps:-47.5,gpt:-50.3,atv:5.6,type:"moderate"},
-  {n:"Garima",gps:-47.6,gpt:-50.3,atv:5.3,type:"moderate"},
-  {n:"Shri Shiva Shakti",gps:-47.0,gpt:-52.6,atv:11.8,type:"moderate"},
-  {n:"Shree Shambavi",gps:-46.8,gpt:-46.1,atv:-1.2,type:"moderate"},
-  {n:"BTM Layout",gps:-46.9,gpt:-48.6,atv:3.4,type:"moderate"},
-  {n:"Hoysala Nagar",gps:-46.2,gpt:-41.8,atv:-7.5,type:"moderate"},
-  {n:"Maruthi Layout",gps:-46.4,gpt:-50.6,atv:8.6,type:"moderate"},
-  {n:"Thindlu",gps:-49.6,gpt:-49.6,atv:0.1,type:"moderate"},
-  {n:"Saroja",gps:-49.4,gpt:-56.8,atv:17.0,type:"moderate"},
-  {n:"Rajarajeshwari",gps:-38.4,gpt:-48.5,atv:19.7,type:"moderate"},
-  {n:"Bhagya",gps:-44.8,gpt:-45.1,atv:0.6,type:"moderate"},
-  {n:"Chareeksha",gps:-42.2,gpt:-50.9,atv:17.5,type:"moderate"},
-  {n:"Yelahanka",gps:-42.3,gpt:-46.0,atv:6.9,type:"moderate"},
-  {n:"Shreyas",gps:-40.3,gpt:-48.3,atv:15.5,type:"moderate"},
-  {n:"RAGHAVA",gps:-45.7,gpt:-44.3,atv:-2.4,type:"moderate"},
-  {n:"SLV",gps:-37.3,gpt:-30.6,atv:-9.7,type:"moderate"},
-  {n:"KSFC Layout",gps:-38.0,gpt:-46.6,atv:16.1,type:"moderate"},
-  {n:"Pragati",gps:-38.9,gpt:-42.5,atv:6.1,type:"moderate"},
-  {n:"Sowmya",gps:-38.5,gpt:-44.6,atv:11.1,type:"moderate"},
-  {n:"Victorian View",gps:-36.5,gpt:-46.8,atv:19.4,type:"moderate"},
-  {n:"Shri Annapoorneshwari",gps:-34.8,gpt:-38.8,atv:6.6,type:"moderate"},
-  {n:"Sri Siddappaji",gps:-37.9,gpt:-45.5,atv:13.9,type:"moderate"},
-  {n:"Neeladri Road",gps:-36.7,gpt:-36.9,atv:0.4,type:"moderate"},
-  {n:"JHBCS Layout",gps:-36.1,gpt:-40.0,atv:6.5,type:"moderate"},
-  {n:"Sai Sakshik",gps:-36.5,gpt:-46.3,atv:18.4,type:"moderate"},
-  {n:"Sri Mahadeshwara",gps:-36.2,gpt:-10.9,atv:-28.4,type:"moderate"},
-  {n:"Likith",gps:-48.0,gpt:-48.9,atv:1.6,type:"moderate"},
-  {n:"Vinayaka",gps:-38.2,gpt:-42.2,atv:7.0,type:"moderate"},
-  {n:"Shree Raghavendra",gps:-44.4,gpt:-44.4,atv:0.1,type:"moderate"},
-  {n:"Srikanteshwara",gps:-44.0,gpt:-43.2,atv:-1.4,type:"moderate"},
-  {n:"Sri Ganeshwara",gps:-45.1,gpt:-46.1,atv:1.8,type:"moderate"},
-  {n:"Pranav",gps:-43.7,gpt:-48.7,atv:9.6,type:"moderate"},
-  {n:"Bren Avalon",gps:-43.6,gpt:-35.8,atv:-12.1,type:"moderate"},
-  {n:"Bhuvaneshwari 2",gps:-44.6,gpt:-46.9,atv:4.5,type:"moderate"},
-  {n:"Shree Siddhalingeshwara",gps:-31.3,gpt:-41.8,atv:18.1,type:"stable"},
-  {n:"Purva Riviera",gps:-31.2,gpt:-48.4,atv:33.3,type:"stable"},
-  {n:"Gajanana",gps:-26.9,gpt:-47.0,atv:38.0,type:"stable"},
-  {n:"Suvarna",gps:-24.5,gpt:-38.0,atv:21.9,type:"stable"}
+// =====================================================================
+// CONFIGURATION
+// =====================================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzilDt8p-5B5eNELU1NRHhzyXoJx7Bym0Bu9fMN9ZM-UfqndBkLqOivIR8owaqSqm0/exec';
+
+// =====================================================================
+// MASTER DATA — from Google Sheet (updates automatically on login)
+// =====================================================================
+const STORES = [{"bzid":"BZID-1304471262","name":"J24 - Sri Ganeshwara Essentials","short":"Sri Ganeshwara","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304451112","name":"J24 - Essentials Springfields","short":"Springfields","type":"SRP/FSR","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304444075","name":"J24 - Rajarajeshwari Essentials","short":"Rajarajeshwari","type":"Red_Giant","gm":"Naveen P","ge":"Sachin"},{"bzid":"BZID-1304448975","name":"J24 - Srikanteshwara Essentials","short":"Srikanteshwara","type":"Red_Giant","gm":"Naveen P","ge":"Sachin"},{"bzid":"BZID-1304437246","name":"J24 - Pranav Essentials","short":"Pranav","type":"Red_Giant","gm":"KantharajuKS","ge":"Prashant Kaneri"},{"bzid":"BZID-1304439025","name":"J24 - Shreyas Essentials","short":"Shreyas","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304439027","name":"J24 - Sri Kala Bhairava Essentials","short":"Sri Kala Bhairava","type":"Red_Giant","gm":"KantharajuKS","ge":"NaveenaL"},{"bzid":"BZID-1304423556","name":"J24 - Essentials Bren Avalon","short":"Bren Avalon","type":"SRP/FSR","gm":"Naveen P","ge":"Sachin"},{"bzid":"BZID-1304422725","name":"J24 - Lashwik Essentials","short":"Lashwik","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1304377671","name":"J24 - Sogasu Essentials","short":"Sogasu","type":"Red_Giant","gm":"KantharajuKS","ge":"Prashant Kaneri"},{"bzid":"BZID-1304330305","name":"J24 - Sai Sakshik Essentials","short":"Sai Sakshik","type":"Red_Giant","gm":"KantharajuKS","ge":"MaheboobM"},{"bzid":"BZID-1304295202","name":"J24 - Pragati Essentials","short":"Pragati","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1304298141","name":"J24 - Essentials BTM Layout","short":"BTM Layout","type":"SRP/FSR","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304261493","name":"J24 - Shree Shambavi Essentials","short":"Shree Shambavi","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304256485","name":"J24 - Essentials Neeladri Road","short":"Neeladri Road","type":"SRP/FSR","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304243208","name":"J24 - Essentials Bhuvaneshwari 2","short":"Bhuvaneshwari 2","type":"SRP/FSR","gm":"KantharajuKS","ge":"Prashant Kaneri"},{"bzid":"BZID-1304251322","name":"J24 - Essentials Hoysala Nagar","short":"Hoysala Nagar","type":"SRP/FSR","gm":"KantharajuKS","ge":"Prashant Kaneri"},{"bzid":"BZID-1304241437","name":"J24 - Sowmya Essentials","short":"Sowmya","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304241453","name":"J24 - Likith Essentials","short":"Likith","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304241382","name":"J24 - Sathish Essentials","short":"Sathish","type":"SRP/FSR","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304226225","name":"J24 - Essentials JHBCS Layout (Kumaraswamy Layout)","short":"JHBCS Layout","type":"SRP/FSR","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304225871","name":"J24 - Shri Lakshminarashimha Essentials","short":"Shri Lakshminarashimha","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304992073","name":"J24 - Chareeksha Essentials","short":"Chareeksha","type":"Red_Giant","gm":"KantharajuKS","ge":"NaveenaL"},{"bzid":"BZID-1304992113","name":"J24 - Leekshith Essentials","short":"Leekshith","type":"Red_Giant","gm":"Naveen P","ge":"Sachin"},{"bzid":"BZID-1304965166","name":"J24 - Sri Venkateshwara Essentials","short":"Sri Venkateshwara","type":"Red_Giant","gm":"KantharajuKS","ge":"Prashant Kaneri"},{"bzid":"BZID-1304962148","name":"J24 - Nanjundeshwara Essentials","short":"Nanjundeshwara","type":"Red_Giant","gm":"KantharajuKS","ge":"NaveenaL"},{"bzid":"BZID-1304942600","name":"J24 - Shree Raghavendra Essentials","short":"Shree Raghavendra","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304941682","name":"J24 - Shree Siddhalingeshwara Essentials","short":"Shree Siddhalingeshwara","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304937973","name":"J24 - Essentials Celebrity Paradise Layout","short":"Celebrity Paradise","type":"SRP/FSR","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304937791","name":"J24 - Sumukha Essentials","short":"Sumukha","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1304917646","name":"J24 - Laxmi Venkateshwara Essentials","short":"Laxmi Venkateshwara","type":"Red_Giant","gm":"Naveen P","ge":"Sachin"},{"bzid":"BZID-1305094524","name":"J24 - Sri Siddappaji Yuvanidhi Essentials","short":"Sri Siddappaji","type":"Red_Giant","gm":"KantharajuKS","ge":"MaheboobM"},{"bzid":"BZID-1305075348","name":"J24 - Shri Shiva Shakti Essentials","short":"Shri Shiva Shakti","type":"Red_Giant","gm":"KantharajuKS","ge":"Prashant Kaneri"},{"bzid":"BZID-1305066462","name":"J24 - Essentials Thindlu","short":"Thindlu","type":"SRP/FSR","gm":"KantharajuKS","ge":"NaveenaL"},{"bzid":"BZID-1305037637","name":"J24 - Essentials Arvind sporcia","short":"Arvind Sporcia","type":"SRP/FSR","gm":"KantharajuKS","ge":"NaveenaL"},{"bzid":"BZID-1304738634","name":"J24 - Sri Govindalakshmi Essentials","short":"Sri Govindalakshmi","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304740031","name":"J24 - Saroja Essentials","short":"Saroja","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304738647","name":"J24 - Aadhya Essentials","short":"Aadhya","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304712034","name":"J24 - Essentials Horamavu Nandanam Layout","short":"Horamavu Nandanam","type":"SRP/FSR","gm":"KantharajuKS","ge":"MaheboobM"},{"bzid":"BZID-1304718204","name":"J24 - Sanju Essentials","short":"Sanju","type":"Red_Giant","gm":"KantharajuKS","ge":"Prashant Kaneri"},{"bzid":"BZID-1304701223","name":"J24 - Essentials KSFC Layout","short":"KSFC Layout","type":"SRP/FSR","gm":"KantharajuKS","ge":"MaheboobM"},{"bzid":"BZID-1304688615","name":"J24 - Vinayaka Essentials","short":"Vinayaka","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1304668710","name":"J24 - Essentials Maruthi Layout","short":"Maruthi Layout","type":"SRP/FSR","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304668692","name":"J24 - Suvarna Essentials","short":"Suvarna","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1304637466","name":"J24 - Gajanana Essentials","short":"Gajanana","type":"Red_Giant","gm":"KantharajuKS","ge":"NaveenaL"},{"bzid":"BZID-1305144349","name":"J24 - Essentials Purva Riviera","short":"Purva Riviera","type":"SRP/FSR","gm":"Naveen P","ge":"Sachin"},{"bzid":"BZID-1305929322","name":"J24 - Srinidhi Essentials","short":"Srinidhi","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1306089991","name":"J24 - Essentials Yelahanka","short":"Yelahanka","type":"SRP/FSR","gm":"KantharajuKS","ge":"NaveenaL"},{"bzid":"BZID-1306108864","name":"J24 - Om Shakthi Essentials","short":"Om Shakthi","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1306128891","name":"J24 - Garima Essentials","short":"Garima","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1306073972","name":"J24 - SLV Essentials","short":"SLV","type":"Red_Giant","gm":"KantharajuKS","ge":"NaveenaL"},{"bzid":"BZID-1306062686","name":"J24 - Rishan Essentials","short":"Rishan","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1305757530","name":"J24 - Essential Victorian View Layout New","short":"Victorian View","type":"SRP/FSR","gm":"Naveen P","ge":"Sachin"},{"bzid":"BZID-1305762705","name":"J24 - RAGHAVA Essentials","short":"RAGHAVA","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1305744500","name":"J24 - Shri Annapoorneshwari Essentials","short":"Shri Annapoorneshwari","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1305761261","name":"J24 - Bhagya Essentials","short":"Bhagya","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1305742595","name":"J24 - Sri RAGHAVENDRA Essentials","short":"Sri RAGHAVENDRA","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1305749507","name":"J24 - R G ESSENTIALS","short":"R G","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1305732232","name":"J24 - Sri Krishnagururaya Essentials","short":"Sri Krishnagururaya","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1305703618","name":"J24 - Shiva Ganga Essentials","short":"Shiva Ganga","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1305704980","name":"J24 - Shree Lakshmi Essentials","short":"Shree Lakshmi","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1305705005","name":"J24 - Sri Mahadeshwara Essentials","short":"Sri Mahadeshwara","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1305686955","name":"J24 - Arushi Essentials","short":"Arushi","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1305690380","name":"J24 - One9 Essentials","short":"One9","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"},{"bzid":"BZID-1305686914","name":"J24 - S R G HONKAN Essentials","short":"S R G HONKAN","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1305669356","name":"J24 - Kashvi Essentials","short":"Kashvi","type":"Red_Giant","gm":"Naveen P","ge":"Ganesh Babu V"},{"bzid":"BZID-1305687031","name":"J24 - Prime Essentials","short":"Prime","type":"Red_Giant","gm":"KantharajuKS","ge":"Lazar Joshi C.A"},{"bzid":"BZID-1305669528","name":"J24 - Santhosh Essentials","short":"Santhosh","type":"Red_Giant","gm":"Naveen P","ge":"ManjunathV"}];
+
+const GES = ['Ganesh Babu V','ManjunathV','Lazar Joshi C.A','NaveenaL','Sachin','Prashant Kaneri','MaheboobM'];
+const GMS = ['Naveen P','KantharajuKS'];
+const INVESTORS = [
+  {code:'Mohan', name:'Mohan', level:'L1'},
+  {code:'Naveen', name:'Naveen', level:'L2'},
+  {code:'Antony', name:'Antony', level:'L3'}
 ];
+const FOUNDERS = ['Ashish'];
 
-const NOTES = {
-  critical:"6 stores with both bill count AND basket spend falling hard. Churn risk is high — these customers may be switching to competitors. Call or WhatsApp each store today.",
-  "at-risk":"20 stores with 50–57% GPS drop driven mainly by footfall loss. ATV is mostly stable — loyal customers still spend well when they visit. Win them back with a reorder push.",
-  moderate:"30 stores: GPS down 36–50%, primarily seasonal footfall loss. ATV often rising. These customers are still yours — nudge them to reorder with a WhatsApp campaign.",
-  stable:"4 best performers: GPS drop under 32%, several with rising ATV. Study what they do differently and replicate across the network."
-};
+// Sales data — updated monthly from CSV. Placeholder shown when no CSV loaded.
+// SALES_DATA is injected here by Claude when CSV is provided
+const SALES_DATA = null; // Will be populated when CSV is uploaded
 
-const COLORS = {critical:"#A32D2D","at-risk":"#BA7517",moderate:"#888780",stable:"#3B6D11"};
+// =====================================================================
+// STATE
+// =====================================================================
+let USER = null; // {role, name, gm?, ge?}
+let TASKS = [];
+let REMARKS = [];
+let CURRENT_PAGE = '';
+let TASK_STORE = null;
+let UPDATE_TASK_ID = null;
+let REMARK_CTX = null;
 
-function filterStores(type) {
-  document.querySelectorAll('.filter-btns button').forEach(b => b.classList.remove('active'));
-  document.getElementById('fb-'+type).classList.add('active');
-  const list = STORES.filter(s => s.type === type);
-  const c = COLORS[type];
-  document.getElementById('storeGrid').innerHTML = '<div class="store-grid">' +
-    list.map(s => {
-      const bw = Math.min(100, Math.abs(s.gps));
-      const atvColor = s.atv < -5 ? '#A32D2D' : s.atv > 5 ? '#3B6D11' : 'var(--text3)';
-      return `<div class="sg-card">
-        <div class="sg-name">${s.n}</div>
-        <div class="sg-stats">
-          <span style="color:${c};font-weight:500">${s.gps.toFixed(0)}% GPS</span>
-          <span>${s.gpt.toFixed(0)}% bills</span>
-          <span style="color:${atvColor}">${s.atv > 0 ? '+' : ''}${s.atv.toFixed(0)}% ATV</span>
-        </div>
-        <div class="bar-mini"><div class="bar-fill" style="width:${bw}%;background:${c}"></div></div>
-      </div>`;
-    }).join('') + '</div>';
-  document.getElementById('storeNote').textContent = NOTES[type];
+// =====================================================================
+// LOGIN
+// =====================================================================
+let selectedRole = null;
+
+function selectRole(role) {
+  selectedRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('role-' + role).classList.add('selected');
+  setTimeout(() => {
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+    setupStep2(role);
+  }, 200);
 }
 
-function showStage(n) {
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('fs'+i).classList.toggle('active', i === n);
-    const p = document.getElementById('stage'+i);
-    p.classList.toggle('visible', i === n);
-    p.style.display = i === n ? 'block' : 'none';
+function setupStep2(role) {
+  const label = document.getElementById('step2Label');
+  const sel = document.getElementById('nameSelect');
+  const inp = document.getElementById('nameInput');
+  const btn = document.getElementById('loginBtn');
+  sel.style.display = 'none'; inp.style.display = 'none';
+  document.getElementById('loginError').style.display = 'none';
+
+  if (role === 'founder') {
+    label.textContent = 'Select your name';
+    sel.style.display = 'block';
+    sel.innerHTML = '<option value="">Select name...</option>' + FOUNDERS.map(f => `<option value="${f}">${f}</option>`).join('');
+    sel.onchange = () => btn.disabled = !sel.value;
+  } else if (role === 'gm') {
+    label.textContent = 'Select your name';
+    sel.style.display = 'block';
+    sel.innerHTML = '<option value="">Select GM...</option>' + GMS.map(g => `<option value="${g}">${g}</option>`).join('');
+    sel.onchange = () => btn.disabled = !sel.value;
+  } else if (role === 'ge') {
+    label.textContent = 'Select your name';
+    sel.style.display = 'block';
+    sel.innerHTML = '<option value="">Select GE...</option>' + GES.map(g => `<option value="${g}">${g}</option>`).join('');
+    sel.onchange = () => btn.disabled = !sel.value;
+  } else if (role === 'investor') {
+    label.textContent = 'Enter your access code';
+    inp.style.display = 'block';
+    inp.placeholder = 'e.g. Mohan, Naveen, Antony';
+    inp.value = '';
+    inp.oninput = () => btn.disabled = !inp.value.trim();
+  }
+  btn.disabled = true;
+}
+
+function goBackStep() {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+  selectedRole = null;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function doLogin() {
+  const sel = document.getElementById('nameSelect');
+  const inp = document.getElementById('nameInput');
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  let name = '';
+  if (selectedRole === 'investor') {
+    name = inp.value.trim();
+    const inv = INVESTORS.find(i => i.code.toLowerCase() === name.toLowerCase());
+    if (!inv) { errEl.textContent = 'Access code not recognised. Try: Mohan, Naveen, or Antony'; errEl.style.display = 'block'; return; }
+    name = inv.code;
+  } else {
+    name = sel.value;
+    if (!name) return;
+  }
+
+  USER = { role: selectedRole, name };
+  if (selectedRole === 'gm') {
+    USER.stores = STORES.filter(s => s.gm === name);
+    USER.ges = [...new Set(USER.stores.map(s => s.ge))];
+  } else if (selectedRole === 'ge') {
+    USER.stores = STORES.filter(s => s.ge === name);
+    const gmStore = STORES.find(s => s.ge === name);
+    USER.gm = gmStore ? gmStore.gm : '';
+  } else if (selectedRole === 'investor') {
+    USER.investor = INVESTORS.find(i => i.code === name);
+  }
+
+  localStorage.setItem('j24_user', JSON.stringify(USER));
+  startApp();
+}
+
+function logout() {
+  localStorage.removeItem('j24_user');
+  USER = null; TASKS = []; REMARKS = [];
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+  selectedRole = null;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+}
+
+// =====================================================================
+// APP STARTUP
+// =====================================================================
+function startApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sidebarRole').textContent = USER.role.toUpperCase();
+  document.getElementById('sidebarName').textContent = USER.name;
+  buildNav();
+  loadData().then(() => {
+    const pages = getPages();
+    navigateTo(pages[0].id);
+  });
+}
+
+function getPages() {
+  const role = USER.role;
+  if (role === 'founder') return [
+    {id:'overview', label:'Overview', icon:'📊'},
+    {id:'stores', label:'All Stores', icon:'🏪'},
+    {id:'tasks', label:'Tasks', icon:'✅'},
+    {id:'team', label:'Team', icon:'👥'},
+    {id:'remarks', label:'Investor Remarks', icon:'💬'},
+  ];
+  if (role === 'gm') return [
+    {id:'gm_overview', label:'My Cluster', icon:'📊'},
+    {id:'gm_stores', label:'My Stores', icon:'🏪'},
+    {id:'gm_tasks', label:'Team Tasks', icon:'✅'},
+  ];
+  if (role === 'ge') return [
+    {id:'ge_stores', label:'My Stores', icon:'🏪'},
+    {id:'ge_tasks', label:'My Tasks', icon:'✅'},
+  ];
+  if (role === 'investor') return [
+    {id:'inv_overview', label:'Executive View', icon:'📊'},
+    {id:'inv_remarks', label:'My Remarks', icon:'💬'},
+  ];
+  return [];
+}
+
+function buildNav() {
+  const pages = getPages();
+  document.getElementById('sidebarNav').innerHTML = pages.map(p =>
+    `<div class="nav-item" id="nav-${p.id}" onclick="navigateTo('${p.id}')">${p.icon} ${p.label}</div>`
+  ).join('');
+
+  const main = document.getElementById('mainContent');
+  main.innerHTML = pages.map(p => `<div class="page" id="page-${p.id}"></div>`).join('');
+}
+
+function navigateTo(pageId) {
+  CURRENT_PAGE = pageId;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + pageId);
+  if (navEl) navEl.classList.add('active');
+  const pageEl = document.getElementById('page-' + pageId);
+  if (pageEl) { pageEl.classList.add('active'); renderPage(pageId); }
+}
+
+// =====================================================================
+// DATA LOADING
+// =====================================================================
+async function loadData() {
+  try {
+    const params = new URLSearchParams({ action: 'getTasks', t: Date.now() });
+    if (USER.role === 'ge') params.set('ge', USER.name);
+    if (USER.role === 'gm') params.set('gm', USER.name);
+    const res = await fetch(SCRIPT_URL + '?' + params);
+    const json = await res.json();
+    TASKS = json.tasks || [];
+  } catch(e) { TASKS = []; }
+
+  if (USER.role === 'founder' || USER.role === 'investor') {
+    try {
+      const params = new URLSearchParams({ action: 'getRemarks', t: Date.now() });
+      if (USER.role === 'investor') params.set('investor', USER.name);
+      const res = await fetch(SCRIPT_URL + '?' + params);
+      const json = await res.json();
+      REMARKS = json.remarks || [];
+    } catch(e) { REMARKS = []; }
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  filterStores('critical');
-  new Chart(document.getElementById('catChart'), {
-    type: 'bar',
-    data: {
-      labels: ['Rice & Rice','Grnd Spices','Pulses','Flours & Sooji','Sugar & Jaggery','Dry Fruits','Whole Spices','Salt'],
-      datasets: [{
-        label: 'GPS drop (₹L)',
-        data: [10.0, 5.0, 4.0, 3.5, 2.1, 1.4, 1.1, 0.9],
-        backgroundColor: ['#A32D2D','#A32D2D','#BA7517','#BA7517','#BA7517','#888780','#888780','#888780'],
-        borderRadius: 3
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ₹' + ctx.raw.toFixed(1) + 'L lost' } } },
-      scales: {
-        x: { ticks: { callback: v => '₹' + v + 'L', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
-        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
-      }
-    }
+async function refreshData() {
+  await loadData();
+  renderPage(CURRENT_PAGE);
+}
+
+// =====================================================================
+// PAGE RENDERERS
+// =====================================================================
+function renderPage(id) {
+  const el = document.getElementById('page-' + id);
+  if (!el) return;
+  const fn = {
+    overview: renderFounderOverview,
+    stores: renderFounderStores,
+    tasks: renderFounderTasks,
+    team: renderFounderTeam,
+    remarks: renderFounderRemarks,
+    gm_overview: renderGMOverview,
+    gm_stores: renderGMStores,
+    gm_tasks: renderGMTasks,
+    ge_stores: renderGEStores,
+    ge_tasks: renderGETasks,
+    inv_overview: renderInvestorOverview,
+    inv_remarks: renderInvestorRemarks,
+  }[id];
+  if (fn) fn(el);
+}
+
+// ── FOUNDER OVERVIEW ────────────────────────────────────────────────
+function renderFounderOverview(el) {
+  const hasData = !!SALES_DATA;
+  const openTasks = TASKS.filter(t => t.status === 'open' || t.status === 'in-progress').length;
+  const overdue = TASKS.filter(t => t.status === 'open' && isPastDue(t.due_date)).length;
+  const unreadRemarks = REMARKS.filter(r => r.status === 'unread').length;
+
+  el.innerHTML = `
+    <div class="page-title">Network Overview</div>
+    <div class="page-sub">J24 Essentials · ${STORES.length} stores · 2 GMs · 7 GEs</div>
+
+    <div class="grid-4">
+      <div class="met-card">
+        <div class="met-label">Total Stores</div>
+        <div class="met-val">${STORES.length}</div>
+        <div class="met-chg chg-flat">Bengaluru network</div>
+      </div>
+      <div class="met-card">
+        <div class="met-label">Open Tasks</div>
+        <div class="met-val" style="color:${openTasks>0?'var(--amber)':'var(--green)'}">${openTasks}</div>
+        <div class="met-chg ${overdue>0?'chg-down':'chg-flat'}">${overdue} overdue</div>
+      </div>
+      <div class="met-card">
+        <div class="met-label">Tasks Completed</div>
+        <div class="met-val" style="color:var(--green)">${TASKS.filter(t=>t.status==='done').length}</div>
+        <div class="met-chg chg-flat">of ${TASKS.length} total</div>
+      </div>
+      <div class="met-card">
+        <div class="met-label">Investor Remarks</div>
+        <div class="met-val" style="color:${unreadRemarks>0?'var(--blue)':'var(--text)'}">${unreadRemarks}</div>
+        <div class="met-chg chg-flat">unread</div>
+      </div>
+    </div>
+
+    ${hasData ? renderSalesMetrics() : renderNoDataBanner()}
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">GM Performance</div>
+        ${['Naveen P','KantharajuKS'].map(gm => {
+          const gmStores = STORES.filter(s => s.gm === gm);
+          const gmTasks = TASKS.filter(t => t.gm_name === gm);
+          const open = gmTasks.filter(t => t.status==='open'||t.status==='in-progress').length;
+          const done = gmTasks.filter(t => t.status==='done').length;
+          const pct = gmTasks.length ? Math.round(done/gmTasks.length*100) : 0;
+          return `<div style="padding:10px 0;border-bottom:0.5px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span style="font-size:13px;font-weight:500">${gm}</span>
+              <span class="badge badge-gray">${gmStores.length} stores</span>
+              ${open>0?`<span class="badge badge-amber">${open} open</span>`:''}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1;height:4px;background:var(--bg4);border-radius:2px">
+                <div style="width:${pct}%;height:4px;background:var(--green);border-radius:2px"></div>
+              </div>
+              <span style="font-size:11px;color:var(--text2)">${pct}% done</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="card">
+        <div class="card-title">Task Summary by Priority</div>
+        ${['P1','P2','P3'].map(p => {
+          const pTasks = TASKS.filter(t => t.priority === p);
+          const open = pTasks.filter(t => t.status!=='done').length;
+          const done = pTasks.filter(t => t.status==='done').length;
+          const color = p==='P1'?'var(--red)':p==='P2'?'var(--amber)':'var(--green)';
+          const label = p==='P1'?'Critical — Today':p==='P2'?'High — This Week':'Normal — Next Week';
+          return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+            <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
+            <div style="flex:1;font-size:12px">${label}</div>
+            <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text2)">${open} open</span>
+            <span class="badge badge-green">${done} done</span>
+          </div>`;
+        }).join('')}
+        <div style="margin-top:12px">
+          <button class="btn primary" onclick="navigateTo('tasks')" style="width:100%;font-size:12px">Manage all tasks →</button>
+        </div>
+      </div>
+    </div>
+
+    ${unreadRemarks > 0 ? `
+    <div class="card" style="border-color:rgba(91,141,238,0.3)">
+      <div class="card-title" style="color:var(--blue)">💬 ${unreadRemarks} unread investor remark${unreadRemarks>1?'s':''}</div>
+      ${REMARKS.filter(r=>r.status==='unread').slice(0,3).map(r => `
+        <div style="padding:8px 0;border-bottom:0.5px solid var(--border)">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">${r.investor_name} · ${r.context_ref||r.context_type} · ${r.timestamp}</div>
+          <div style="font-size:13px">${r.remark_text}</div>
+        </div>
+      `).join('')}
+      <button class="btn" onclick="navigateTo('remarks')" style="margin-top:12px;font-size:12px">View all remarks →</button>
+    </div>` : ''}
+  `;
+}
+
+function renderSalesMetrics() {
+  const d = SALES_DATA;
+  const momGPS = ((d.mtd_gps - d.mtd1_gps) / d.mtd1_gps * 100).toFixed(1);
+  const momGPT = ((d.mtd_gpt - d.mtd1_gpt) / d.mtd1_gpt * 100).toFixed(1);
+  const atvMTD = (d.mtd_gps / d.mtd_gpt).toFixed(0);
+  const atvMTD1 = (d.mtd1_gps / d.mtd1_gpt).toFixed(0);
+  const momATV = ((atvMTD - atvMTD1) / atvMTD1 * 100).toFixed(1);
+  const fmt = n => n >= 100000 ? (n/100000).toFixed(1)+'L' : n >= 1000 ? (n/1000).toFixed(0)+'K' : n;
+  return `
+    <div class="grid-4" style="margin-bottom:1.25rem">
+      <div class="met-card" style="cursor:pointer" onclick="openRemark('kpi','Network GPS')">
+        <div class="met-label">Network GPS (MTD)</div>
+        <div class="met-val">₹${fmt(d.mtd_gps)}</div>
+        <div class="met-chg ${momGPS>=0?'chg-up':'chg-down'}">${momGPS>=0?'+':''}${momGPS}% vs last period</div>
+      </div>
+      <div class="met-card" style="cursor:pointer" onclick="openRemark('kpi','Bill Count')">
+        <div class="met-label">Bill Count (MTD)</div>
+        <div class="met-val">${fmt(d.mtd_gpt)}</div>
+        <div class="met-chg ${momGPT>=0?'chg-up':'chg-down'}">${momGPT>=0?'+':''}${momGPT}% vs last period</div>
+      </div>
+      <div class="met-card" style="cursor:pointer" onclick="openRemark('kpi','ATV')">
+        <div class="met-label">Avg Basket (ATV)</div>
+        <div class="met-val">₹${atvMTD}</div>
+        <div class="met-chg ${momATV>=0?'chg-up':'chg-down'}">${momATV>=0?'+':''}${momATV}% vs last period</div>
+      </div>
+      <div class="met-card">
+        <div class="met-label">AI Insight</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px">${d.insight || 'Upload CSV to generate AI insight'}</div>
+      </div>
+    </div>`;
+}
+
+function renderNoDataBanner() {
+  return `
+    <div style="background:var(--bg2);border:0.5px dashed var(--border2);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;margin-bottom:1.25rem">
+      <div style="font-size:24px;margin-bottom:8px">📁</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">No sales data loaded yet</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Upload your monthly CSV here in the Claude chat to populate KPIs, store performance, and AI insights.</div>
+      <div style="font-size:11px;color:var(--text3)">Tasks, team management, and investor remarks work without CSV data</div>
+    </div>`;
+}
+
+// ── FOUNDER ALL STORES ───────────────────────────────────────────────
+function renderFounderStores(el) {
+  const tasksByStore = {};
+  TASKS.forEach(t => { if (!tasksByStore[t.store_name]) tasksByStore[t.store_name] = []; tasksByStore[t.store_name].push(t); });
+
+  el.innerHTML = `
+    <div class="page-title">All Stores</div>
+    <div class="page-sub">68 stores · Click any store to assign a task</div>
+    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+      <input id="storeSearch" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:7px 12px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;flex:1;min-width:160px" placeholder="Search store..." oninput="filterStoreCards(this.value)">
+      <select id="gmFilter" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:7px 12px;font-size:13px;color:var(--text);font-family:var(--font)" onchange="filterStoreCards(document.getElementById('storeSearch').value)">
+        <option value="">All GMs</option>
+        ${GMS.map(g=>`<option value="${g}">${g}</option>`).join('')}
+      </select>
+      <select id="geFilter" style="background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius);padding:7px 12px;font-size:13px;color:var(--text);font-family:var(--font)" onchange="filterStoreCards(document.getElementById('storeSearch').value)">
+        <option value="">All GEs</option>
+        ${GES.map(g=>`<option value="${g}">${g}</option>`).join('')}
+      </select>
+    </div>
+    <div class="store-grid" id="storeGrid">
+      ${STORES.map(s => {
+        const storeTasks = tasksByStore[s.name] || [];
+        const openT = storeTasks.filter(t=>t.status!=='done').length;
+        const storeData = SALES_DATA?.stores?.find(sd=>sd.name===s.name);
+        const perf = storeData ? (storeData.mom_gps >= 0 ? 'stable' : storeData.mom_gps < -15 ? 'critical' : 'moderate') : '';
+        return `<div class="store-card ${perf}" data-name="${s.short.toLowerCase()}" data-gm="${s.gm}" data-ge="${s.ge}" onclick="openTaskModal('${s.name.replace(/'/g,"\\'")}','${s.bzid}','${s.ge}','${s.gm}')">
+          <div class="sc-name">${s.short}</div>
+          <div class="sc-stats">
+            <span style="font-size:10px;color:var(--text3)">${s.type}</span>
+            <span style="font-size:10px;color:var(--text3)">${s.ge}</span>
+          </div>
+          ${storeData ? `<div class="sc-bar"><div class="sc-bar-fill" style="width:${Math.min(100,Math.abs(storeData.mom_gps))}%;background:${storeData.mom_gps>=0?'var(--green)':'var(--red)'}"></div></div>
+          <div style="font-size:11px;color:${storeData.mom_gps>=0?'var(--green)':'var(--red)'};margin-top:3px">${storeData.mom_gps>=0?'+':''}${storeData.mom_gps.toFixed(0)}% GPS</div>` : ''}
+          ${openT > 0 ? `<div class="sc-action">✅ ${openT} open task${openT>1?'s':''}</div>` : ''}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function filterStoreCards(q) {
+  const gm = document.getElementById('gmFilter')?.value || '';
+  const ge = document.getElementById('geFilter')?.value || '';
+  document.querySelectorAll('.store-card').forEach(c => {
+    const name = c.dataset.name || '';
+    const cardGM = c.dataset.gm || '';
+    const cardGE = c.dataset.ge || '';
+    const show = (!q || name.includes(q.toLowerCase())) && (!gm || cardGM === gm) && (!ge || cardGE === ge);
+    c.style.display = show ? '' : 'none';
   });
+}
+
+// ── FOUNDER TASKS ────────────────────────────────────────────────────
+function renderFounderTasks(el) {
+  const tabs = ['all','open','in-progress','done','overdue'];
+  el.innerHTML = `
+    <div class="page-title">Tasks</div>
+    <div class="page-sub">Assign and track tasks across the network</div>
+    <div class="tab-nav">
+      ${tabs.map((t,i) => `<button class="tab-btn ${i===0?'active':''}" onclick="switchTaskTab('${t}',this)">${t.charAt(0).toUpperCase()+t.slice(1).replace('-',' ')}</button>`).join('')}
+      <button class="tab-btn" style="margin-left:auto;background:var(--blue);color:#fff" onclick="openTaskModal()">+ New Task</button>
+    </div>
+    <div id="taskTabContent">${renderTaskList('all')}</div>`;
+}
+
+function switchTaskTab(filter, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('taskTabContent').innerHTML = renderTaskList(filter);
+}
+
+function renderTaskList(filter) {
+  let tasks = [...TASKS];
+  if (filter === 'overdue') tasks = tasks.filter(t => t.status !== 'done' && isPastDue(t.due_date));
+  else if (filter !== 'all') tasks = tasks.filter(t => t.status === filter);
+  tasks.sort((a,b) => {const po={P1:0,P2:1,P3:2}; return (po[a.priority]||2)-(po[b.priority]||2);});
+  if (!tasks.length) return `<div class="empty-state">No ${filter === 'all' ? '' : filter} tasks</div>`;
+  return tasks.map(t => renderTaskRow(t, 'founder')).join('');
+}
+
+function renderTaskRow(t, role) {
+  const isOverdue = t.status !== 'done' && isPastDue(t.due_date);
+  const statusColors = {open:'badge-amber','in-progress':'badge-blue',done:'badge-green',overdue:'badge-red'};
+  const statusLabel = isOverdue && t.status!=='done' ? 'Overdue' : t.status;
+  return `<div class="task-row">
+    <div class="task-priority ${t.priority==='P1'?'p1-dot':t.priority==='P2'?'p2-dot':'p3-dot'}"></div>
+    <div class="task-body">
+      <div class="task-store">${t.store_name?.replace('J24 - ','') || ''} · GE: ${t.ge_name} · ${t.priority}</div>
+      <div class="task-desc">${t.task_description}</div>
+      ${t.ge_comment ? `<div style="font-size:11px;color:var(--text2);margin-top:3px;font-style:italic">GE: "${t.ge_comment}"</div>` : ''}
+      ${t.proof_link ? `<div style="font-size:11px;margin-top:3px"><a href="${t.proof_link}" target="_blank" style="color:var(--blue)">📎 View proof</a></div>` : ''}
+      <div class="task-meta">
+        <span class="badge ${statusColors[t.status]||'badge-gray'}">${statusLabel}</span>
+        <span>Due: ${t.due_date}</span>
+        <span>By: ${t.assigned_by}</span>
+        <span>${t.created_at?.split(',')[0] || ''}</span>
+      </div>
+    </div>
+    <div class="task-actions">
+      ${role === 'founder' && t.status !== 'done' ? `<button class="btn-sm danger" onclick="escalateTask('${t.task_id}')">Escalate</button>` : ''}
+      ${role === 'ge' && t.status !== 'done' ? `<button class="btn-sm primary" onclick="openUpdateModal('${t.task_id}','${(t.task_description||'').replace(/'/g,"\\'")}')">Update</button>` : ''}
+    </div>
+  </div>`;
+}
+
+// ── FOUNDER TEAM ─────────────────────────────────────────────────────
+function renderFounderTeam(el) {
+  el.innerHTML = `
+    <div class="page-title">Team</div>
+    <div class="page-sub">GMs, GEs, and store assignments</div>
+    <div class="grid-2">
+      ${GMS.map(gm => {
+        const gmStores = STORES.filter(s => s.gm === gm);
+        const gmGEs = [...new Set(gmStores.map(s => s.ge))];
+        const gmTasks = TASKS.filter(t => t.gm_name === gm);
+        const done = gmTasks.filter(t=>t.status==='done').length;
+        const open = gmTasks.filter(t=>t.status!=='done').length;
+        return `<div class="card">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:18px">🏢</div>
+            <div>
+              <div style="font-size:14px;font-weight:500">${gm}</div>
+              <div style="font-size:12px;color:var(--text2)">${gmStores.length} stores · ${gmGEs.length} GEs</div>
+            </div>
+            <div style="margin-left:auto;text-align:right">
+              <div style="font-size:12px;color:var(--amber)">${open} open</div>
+              <div style="font-size:12px;color:var(--green)">${done} done</div>
+            </div>
+          </div>
+          <div class="divider" style="margin:8px 0"></div>
+          ${gmGEs.map(ge => {
+            const geStores = STORES.filter(s=>s.ge===ge&&s.gm===gm);
+            const geTasks = TASKS.filter(t=>t.ge_name===ge);
+            const geOpen = geTasks.filter(t=>t.status!=='done').length;
+            return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:0.5px solid var(--border)">
+              <div style="font-size:12px;font-weight:500;flex:1">${ge}</div>
+              <span class="badge badge-gray">${geStores.length} stores</span>
+              ${geOpen>0?`<span class="badge badge-amber">${geOpen} tasks</span>`:`<span class="badge badge-green">✓ clear</span>`}
+            </div>`;
+          }).join('')}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">All GEs — Store Assignment</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="border-bottom:0.5px solid var(--border)">
+            <th style="text-align:left;padding:8px;color:var(--text2);font-weight:500">GE</th>
+            <th style="text-align:left;padding:8px;color:var(--text2);font-weight:500">GM</th>
+            <th style="text-align:left;padding:8px;color:var(--text2);font-weight:500">Stores</th>
+            <th style="text-align:right;padding:8px;color:var(--text2);font-weight:500">Open Tasks</th>
+          </tr></thead>
+          <tbody>
+            ${GES.map(ge => {
+              const geStores = STORES.filter(s=>s.ge===ge);
+              const gm = geStores[0]?.gm || '';
+              const geOpen = TASKS.filter(t=>t.ge_name===ge&&t.status!=='done').length;
+              return `<tr style="border-bottom:0.5px solid var(--border)">
+                <td style="padding:8px;font-weight:500">${ge}</td>
+                <td style="padding:8px;color:var(--text2)">${gm}</td>
+                <td style="padding:8px;color:var(--text2)">${geStores.slice(0,3).map(s=>s.short).join(', ')}${geStores.length>3?` +${geStores.length-3} more`:''}</td>
+                <td style="padding:8px;text-align:right">${geOpen>0?`<span class="badge badge-amber">${geOpen}</span>`:`<span class="badge badge-green">✓</span>`}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── FOUNDER REMARKS ──────────────────────────────────────────────────
+function renderFounderRemarks(el) {
+  el.innerHTML = `
+    <div class="page-title">Investor Remarks</div>
+    <div class="page-sub">What investors are asking — respond directly</div>
+    <div style="display:flex;gap:8px;margin-bottom:1rem">
+      <button class="btn-sm ${REMARKS.filter(r=>r.status==='unread').length?'primary':''}" onclick="refreshData()">🔄 Refresh (${REMARKS.filter(r=>r.status==='unread').length} unread)</button>
+    </div>
+    ${!REMARKS.length ? `<div class="empty-state">No remarks yet. Investors can leave remarks on any metric from their view.</div>` :
+    REMARKS.sort((a,b)=>a.status==='unread'?-1:1).map(r => `
+      <div class="remark-card">
+        <div class="rc-header">
+          <span class="rc-name">${r.investor_name}</span>
+          <span class="badge l${INVESTORS.find(i=>i.code===r.investor_name)?.level?.replace('L','') || '1'}">${INVESTORS.find(i=>i.code===r.investor_name)?.level || 'L1'}</span>
+          <span class="rc-ctx">on ${r.context_ref || r.context_type}</span>
+          <span class="badge ${r.status==='unread'?'badge-blue':'badge-gray'}">${r.status}</span>
+          <span class="rc-time">${r.timestamp?.split(',')[0]||''}</span>
+        </div>
+        <div class="rc-text">${r.remark_text}</div>
+        ${r.founder_response ? `<div class="rc-response"><div class="rc-response-label">Your response</div>${r.founder_response}</div>` :
+        `<div style="display:flex;gap:6px;margin-top:8px">
+          <input id="resp-${r.remark_id}" class="form-input" style="flex:1;padding:6px 10px;font-size:12px" placeholder="Type your response...">
+          <button class="btn-sm primary" onclick="sendResponse('${r.remark_id}')">Reply</button>
+        </div>`}
+      </div>`).join('')}`;
+}
+
+// ── GM OVERVIEW ──────────────────────────────────────────────────────
+function renderGMOverview(el) {
+  const myStores = STORES.filter(s => s.gm === USER.name);
+  const myTasks = TASKS.filter(t => t.gm_name === USER.name);
+  const open = myTasks.filter(t=>t.status!=='done').length;
+  const overdue = myTasks.filter(t=>t.status!=='done'&&isPastDue(t.due_date)).length;
+  const done = myTasks.filter(t=>t.status==='done').length;
+  const myGEs = [...new Set(myStores.map(s=>s.ge))];
+
+  el.innerHTML = `
+    <div class="page-title">My Cluster — ${USER.name}</div>
+    <div class="page-sub">${myStores.length} stores · ${myGEs.length} GEs</div>
+    <div class="grid-4">
+      <div class="met-card"><div class="met-label">My Stores</div><div class="met-val">${myStores.length}</div></div>
+      <div class="met-card"><div class="met-label">Open Tasks</div><div class="met-val" style="color:${open?'var(--amber)':'var(--green)'}">${open}</div><div class="met-chg ${overdue?'chg-down':'chg-flat'}">${overdue} overdue</div></div>
+      <div class="met-card"><div class="met-label">Completed</div><div class="met-val" style="color:var(--green)">${done}</div></div>
+      <div class="met-card"><div class="met-label">My GEs</div><div class="met-val">${myGEs.length}</div></div>
+    </div>
+    ${SALES_DATA ? renderSalesMetrics() : renderNoDataBanner()}
+    <div class="card">
+      <div class="card-title">GE Task Status</div>
+      ${myGEs.map(ge => {
+        const geTasks = myTasks.filter(t=>t.ge_name===ge);
+        const geOpen = geTasks.filter(t=>t.status!=='done').length;
+        const geDone = geTasks.filter(t=>t.status==='done').length;
+        const pct = geTasks.length ? Math.round(geDone/geTasks.length*100) : 100;
+        const geStores = myStores.filter(s=>s.ge===ge);
+        return `<div style="padding:10px 0;border-bottom:0.5px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+            <span style="font-size:13px;font-weight:500">${ge}</span>
+            <span class="badge badge-gray">${geStores.length} stores</span>
+            ${geOpen>0?`<span class="badge badge-amber">${geOpen} open</span>`:`<span class="badge badge-green">✓ all clear</span>`}
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:4px;background:var(--bg4);border-radius:2px">
+              <div style="width:${pct}%;height:4px;background:var(--green);border-radius:2px"></div>
+            </div>
+            <span style="font-size:11px;color:var(--text2)">${pct}%</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── GM STORES ────────────────────────────────────────────────────────
+function renderGMStores(el) {
+  const myStores = STORES.filter(s => s.gm === USER.name);
+  el.innerHTML = `
+    <div class="page-title">My Stores</div>
+    <div class="page-sub">${myStores.length} stores in your cluster · Click to assign task</div>
+    <div class="store-grid">
+      ${myStores.map(s => {
+        const storeTasks = TASKS.filter(t=>t.store_name===s.name&&t.status!=='done');
+        const storeData = SALES_DATA?.stores?.find(sd=>sd.name===s.name);
+        const perf = storeData ? (storeData.mom_gps >= 0 ? 'stable' : storeData.mom_gps < -15 ? 'critical' : 'moderate') : '';
+        return `<div class="store-card ${perf}" onclick="openTaskModal('${s.name.replace(/'/g,"\\'")}','${s.bzid}','${s.ge}','${s.gm}')">
+          <div class="sc-name">${s.short}</div>
+          <div class="sc-stats"><span>${s.ge}</span><span>${s.type}</span></div>
+          ${storeData?`<div style="font-size:11px;color:${storeData.mom_gps>=0?'var(--green)':'var(--red)'};margin-top:4px">${storeData.mom_gps>=0?'+':''}${storeData.mom_gps.toFixed(0)}% GPS</div>`:''}
+          ${storeTasks.length?`<div class="sc-action">⚠ ${storeTasks.length} open task${storeTasks.length>1?'s':''}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── GM TASKS ─────────────────────────────────────────────────────────
+function renderGMTasks(el) {
+  const myTasks = TASKS.filter(t => t.gm_name === USER.name);
+  myTasks.sort((a,b) => {const po={P1:0,P2:1,P3:2};return (po[a.priority]||2)-(po[b.priority]||2);});
+  el.innerHTML = `
+    <div class="page-title">Team Tasks</div>
+    <div class="page-sub">All tasks across your GEs · <button class="btn-sm primary" onclick="openTaskModal()" style="margin-left:6px">+ Assign Task</button></div>
+    ${!myTasks.length ? `<div class="empty-state">No tasks yet. Assign a task from the stores view.</div>` : myTasks.map(t => renderTaskRow(t,'gm')).join('')}`;
+}
+
+// ── GE STORES ────────────────────────────────────────────────────────
+function renderGEStores(el) {
+  const myStores = USER.stores || [];
+  el.innerHTML = `
+    <div class="page-title">My Stores</div>
+    <div class="page-sub">${myStores.length} stores assigned to you · GM: ${USER.gm}</div>
+    <div class="store-grid">
+      ${myStores.map(s => {
+        const storeTasks = TASKS.filter(t=>t.store_name===s.name&&t.status!=='done'&&t.ge_name===USER.name);
+        const storeData = SALES_DATA?.stores?.find(sd=>sd.name===s.name);
+        const perf = storeData?(storeData.mom_gps>=0?'stable':storeData.mom_gps<-15?'critical':'moderate'):'';
+        return `<div class="store-card ${perf}">
+          <div class="sc-name">${s.short}</div>
+          <div class="sc-stats"><span>${s.type}</span><span>${s.bzid}</span></div>
+          ${storeData?`<div style="font-size:11px;color:${storeData.mom_gps>=0?'var(--green)':'var(--red)'};margin-top:4px">${storeData.mom_gps>=0?'+':''}${storeData.mom_gps.toFixed(0)}% GPS · ATV ${storeData.atv_chg>=0?'+':''}${(storeData.atv_chg||0).toFixed(0)}%</div>`:''}
+          ${storeTasks.length?`<div class="sc-action">⚠ ${storeTasks.length} task${storeTasks.length>1?'s':''} pending</div>`:`<div class="sc-action" style="color:var(--green)">✓ No open tasks</div>`}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── GE TASKS ─────────────────────────────────────────────────────────
+function renderGETasks(el) {
+  const myTasks = TASKS.filter(t => t.ge_name === USER.name);
+  const open = myTasks.filter(t=>t.status!=='done');
+  const done = myTasks.filter(t=>t.status==='done');
+  open.sort((a,b)=>{const po={P1:0,P2:1,P3:2};return(po[a.priority]||2)-(po[b.priority]||2);});
+  el.innerHTML = `
+    <div class="page-title">My Tasks</div>
+    <div class="page-sub">${open.length} open · ${done.length} completed</div>
+    ${!myTasks.length ? `<div class="empty-state">No tasks assigned to you yet. Check back soon.</div>` : ''}
+    ${open.length ? `<div class="section-label" style="margin-bottom:.5rem">Open (${open.length})</div>
+      ${open.map(t => renderTaskRow(t,'ge')).join('')}` : ''}
+    ${done.length ? `<div class="section-label" style="margin-top:1.25rem;margin-bottom:.5rem">Completed (${done.length})</div>
+      ${done.map(t => renderTaskRow(t,'ge')).join('')}` : ''}`;
+}
+
+// ── INVESTOR OVERVIEW ────────────────────────────────────────────────
+function renderInvestorOverview(el) {
+  const inv = USER.investor;
+  el.innerHTML = `
+    <div class="page-title">Executive View</div>
+    <div class="page-sub">J24 Essentials · ${inv.name} · ${inv.level} · Read only — click any metric to leave a remark</div>
+
+    <div class="grid-4">
+      <div class="met-card" style="cursor:pointer" onclick="openRemark('kpi','Total Stores')">
+        <div class="met-label">Network Size</div>
+        <div class="met-val">${STORES.length}</div>
+        <div class="met-chg chg-flat">Bengaluru stores</div>
+        <div style="font-size:10px;color:var(--blue);margin-top:4px">💬 Leave remark</div>
+      </div>
+      <div class="met-card" style="cursor:pointer" onclick="openRemark('kpi','GMs')">
+        <div class="met-label">GMs</div>
+        <div class="met-val">2</div>
+        <div class="met-chg chg-flat">Naveen P · KantharajuKS</div>
+      </div>
+      <div class="met-card" style="cursor:pointer" onclick="openRemark('kpi','GEs')">
+        <div class="met-label">GEs (Field)</div>
+        <div class="met-val">7</div>
+        <div class="met-chg chg-flat">68 stores covered</div>
+      </div>
+      <div class="met-card" style="cursor:pointer" onclick="openRemark('kpi','Tasks')">
+        <div class="met-label">Active Tasks</div>
+        <div class="met-val">${TASKS.filter(t=>t.status!=='done').length}</div>
+        <div class="met-chg chg-flat">${TASKS.filter(t=>t.status==='done').length} completed</div>
+      </div>
+    </div>
+
+    ${SALES_DATA ? `
+    <div class="grid-4">
+      ${['Network GPS','Bill Count','Avg Basket','Top GM'].map((label,i) => {
+        const d = SALES_DATA;
+        const vals = [
+          {v:`₹${(d.mtd_gps/100000).toFixed(1)}L`,c:((d.mtd_gps-d.mtd1_gps)/d.mtd1_gps*100).toFixed(1)},
+          {v:d.mtd_gpt.toLocaleString(),c:((d.mtd_gpt-d.mtd1_gpt)/d.mtd1_gpt*100).toFixed(1)},
+          {v:`₹${(d.mtd_gps/d.mtd_gpt).toFixed(0)}`,c:null},
+          {v:'Naveen P',c:null}
+        ];
+        const val = vals[i];
+        return `<div class="met-card" style="cursor:pointer" onclick="openRemark('kpi','${label}')">
+          <div class="met-label">${label}</div>
+          <div class="met-val">${val.v}</div>
+          ${val.c!==null?`<div class="met-chg ${val.c>=0?'chg-up':'chg-down'}">${val.c>=0?'+':''}${val.c}% MoM</div>`:''}
+          <div style="font-size:10px;color:var(--blue);margin-top:4px">💬 Remark</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="card" style="cursor:pointer" onclick="openRemark('insight','AI Summary')">
+      <div class="card-title">AI Insight Summary <span style="font-size:10px;color:var(--blue);margin-left:8px">💬 Leave remark</span></div>
+      <div style="font-size:13px;line-height:1.7;color:var(--text2)">${SALES_DATA.insight || 'Upload CSV to generate AI insight'}</div>
+    </div>` : renderNoDataBanner()}
+
+    <div class="card">
+      <div class="card-title">Store Types</div>
+      <div class="grid-2">
+        <div style="text-align:center;padding:1rem">
+          <div style="font-size:28px;font-weight:600;color:var(--blue)">${STORES.filter(s=>s.type==='Red_Giant').length}</div>
+          <div style="font-size:12px;color:var(--text2)">Red Giant stores</div>
+        </div>
+        <div style="text-align:center;padding:1rem">
+          <div style="font-size:28px;font-weight:600;color:var(--amber)">${STORES.filter(s=>s.type==='SRP/FSR').length}</div>
+          <div style="font-size:12px;color:var(--text2)">SRP / FSR stores</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── INVESTOR REMARKS ─────────────────────────────────────────────────
+function renderInvestorRemarks(el) {
+  const myRemarks = REMARKS.filter(r => r.investor_name === USER.name);
+  el.innerHTML = `
+    <div class="page-title">My Remarks</div>
+    <div class="page-sub">Your questions and the founder's responses</div>
+    <button class="btn primary" onclick="openRemark('general','General')" style="margin-bottom:1rem">+ New Remark</button>
+    ${!myRemarks.length ? `<div class="empty-state">No remarks yet. Go to Executive View and click any metric to leave a remark.</div>` :
+    myRemarks.reverse().map(r => `
+      <div class="remark-card">
+        <div class="rc-header">
+          <span class="rc-ctx">on ${r.context_ref || r.context_type}</span>
+          <span class="badge ${r.status==='responded'?'badge-green':r.status==='read'?'badge-gray':'badge-blue'}">${r.status}</span>
+          <span class="rc-time">${r.timestamp?.split(',')[0]||''}</span>
+        </div>
+        <div class="rc-text">${r.remark_text}</div>
+        ${r.founder_response?`<div class="rc-response"><div class="rc-response-label">Founder response</div>${r.founder_response}</div>`:`<div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">Awaiting response from Ashish</div>`}
+      </div>`).join('')}`;
+}
+
+// =====================================================================
+// TASK MODAL
+// =====================================================================
+function openTaskModal(storeName, bzid, ge, gm) {
+  TASK_STORE = storeName ? {name:storeName, bzid:bzid||'', ge:ge||'', gm:gm||''} : null;
+  const sub = document.getElementById('taskModalStore');
+
+  if (!storeName && USER.role !== 'founder' && USER.role !== 'gm') {
+    // For general task with no store selected
+    document.getElementById('taskModal').classList.add('open');
+    sub.innerHTML = 'General task — select store';
+    return;
+  }
+
+  if (!storeName) {
+    // Show store selector in modal
+    sub.innerHTML = `<select class="form-input" id="modalStoreSelect" onchange="setModalStore(this.value)" style="margin-bottom:8px">
+      <option value="">Select store...</option>
+      ${(USER.role==='gm'?STORES.filter(s=>s.gm===USER.name):STORES).map(s=>`<option value="${s.name}" data-bzid="${s.bzid}" data-ge="${s.ge}" data-gm="${s.gm}">${s.short}</option>`).join('')}
+    </select>`;
+  } else {
+    sub.textContent = storeName.replace('J24 - ','');
+  }
+  document.getElementById('taskModal').classList.add('open');
+}
+
+function setModalStore(name) {
+  const opt = document.querySelector(`#modalStoreSelect option[value="${name}"]`);
+  if (opt) TASK_STORE = {name, bzid:opt.dataset.bzid, ge:opt.dataset.ge, gm:opt.dataset.gm};
+}
+
+function closeTaskModal(e) {
+  if (e.target === document.getElementById('taskModal')) document.getElementById('taskModal').classList.remove('open');
+}
+
+async function assignTask() {
+  const store = TASK_STORE;
+  if (!store?.name) { alert('Please select a store'); return; }
+  const desc = document.getElementById('taskDesc').value.trim();
+  if (!desc) { alert('Please enter a task description'); return; }
+  const btn = document.getElementById('assignBtn');
+  btn.disabled = true; btn.textContent = 'Assigning...';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action: 'createTask',
+        store_name: store.name, bzid: store.bzid,
+        ge_name: store.ge, gm_name: store.gm,
+        priority: document.getElementById('taskPriority').value,
+        problem_type: document.getElementById('taskProblem').value,
+        task_description: desc,
+        assigned_by: USER.name
+      })
+    });
+    btn.textContent = 'Assigned!';
+    document.getElementById('taskDesc').value = '';
+    setTimeout(() => {
+      document.getElementById('taskModal').classList.remove('open');
+      btn.disabled = false; btn.textContent = 'Assign Task';
+      refreshData();
+    }, 800);
+  } catch(e) { btn.disabled=false; btn.textContent='Assign Task'; alert('Could not save. Check connection.'); }
+}
+
+function escalateTask(taskId) {
+  if (!confirm('Escalate this task? It will be flagged for urgent attention.')) return;
+  updateTaskStatus(taskId, 'escalated', '', '');
+}
+
+// =====================================================================
+// UPDATE TASK MODAL (GE)
+// =====================================================================
+function openUpdateModal(taskId, desc) {
+  UPDATE_TASK_ID = taskId;
+  document.getElementById('updateModalDesc').textContent = desc;
+  document.getElementById('updateStatus').value = 'in-progress';
+  document.getElementById('updateComment').value = '';
+  document.getElementById('updateProof').value = '';
+  document.getElementById('updateModal').classList.add('open');
+}
+
+function closeUpdateModal(e) {
+  if (e.target === document.getElementById('updateModal')) document.getElementById('updateModal').classList.remove('open');
+}
+
+async function submitUpdate() {
+  const btn = document.getElementById('updateBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action: 'updateTask',
+        task_id: UPDATE_TASK_ID,
+        status: document.getElementById('updateStatus').value,
+        ge_comment: document.getElementById('updateComment').value,
+        proof_link: document.getElementById('updateProof').value
+      })
+    });
+    btn.textContent = 'Saved!';
+    setTimeout(() => {
+      document.getElementById('updateModal').classList.remove('open');
+      btn.disabled=false; btn.textContent='Save Update';
+      refreshData();
+    }, 800);
+  } catch(e) { btn.disabled=false; btn.textContent='Save Update'; alert('Could not save. Check connection.'); }
+}
+
+// =====================================================================
+// REMARKS
+// =====================================================================
+let REMARK_CONTEXT_REF = '';
+
+function openRemark(type, ref) {
+  if (USER.role !== 'investor') return;
+  REMARK_CTX = type;
+  REMARK_CONTEXT_REF = ref;
+  document.getElementById('remarkModalCtx').textContent = `On: ${ref}`;
+  document.getElementById('remarkText').value = '';
+  document.getElementById('remarkModal').classList.add('open');
+}
+
+function closeRemarkModal(e) {
+  if (e.target === document.getElementById('remarkModal')) document.getElementById('remarkModal').classList.remove('open');
+}
+
+async function submitRemark() {
+  const text = document.getElementById('remarkText').value.trim();
+  if (!text) { alert('Please enter your remark'); return; }
+  const btn = document.getElementById('remarkBtn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action: 'addRemark',
+        investor_name: USER.name,
+        context_type: REMARK_CTX,
+        context_ref: REMARK_CONTEXT_REF,
+        remark_text: text
+      })
+    });
+    btn.textContent = 'Submitted!';
+    setTimeout(() => {
+      document.getElementById('remarkModal').classList.remove('open');
+      btn.disabled=false; btn.textContent='Submit Remark';
+      refreshData();
+    }, 800);
+  } catch(e) { btn.disabled=false; btn.textContent='Submit Remark'; alert('Could not save.'); }
+}
+
+async function sendResponse(remarkId) {
+  const inp = document.getElementById('resp-' + remarkId);
+  if (!inp?.value.trim()) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action: 'respondRemark', remark_id: remarkId, response: inp.value.trim() })
+    });
+    await refreshData();
+  } catch(e) { alert('Could not save response.'); }
+}
+
+// =====================================================================
+// HELPERS
+// =====================================================================
+function isPastDue(dateStr) {
+  if (!dateStr) return false;
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const d = new Date(parts[2], parts[1]-1, parts[0]);
+    return d < new Date();
+  }
+  return new Date(dateStr) < new Date();
+}
+
+// =====================================================================
+// INIT — check if already logged in
+// =====================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('j24_user');
+  if (saved) {
+    try {
+      USER = JSON.parse(saved);
+      // Re-hydrate derived fields
+      if (USER.role === 'gm') {
+        USER.stores = STORES.filter(s => s.gm === USER.name);
+        USER.ges = [...new Set(USER.stores.map(s => s.ge))];
+      } else if (USER.role === 'ge') {
+        USER.stores = STORES.filter(s => s.ge === USER.name);
+        const gmStore = STORES.find(s => s.ge === USER.name);
+        USER.gm = gmStore ? gmStore.gm : '';
+      } else if (USER.role === 'investor') {
+        USER.investor = INVESTORS.find(i => i.code === USER.name);
+      }
+      startApp();
+    } catch(e) { localStorage.removeItem('j24_user'); }
+  }
 });
 </script>
 </body>
