@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staples Sales Dashboard — J24 Stores</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f5f3; --bg3: #eeeee9;
+    --text: #1a1a18; --text2: #6b6b65; --text3: #9e9e98;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --info-bg: #e6f1fb; --info-text: #0c447c; --info-border: #185fa5;
+    --success-bg: #eaf3de; --success-text: #27500a;
+    --warn-bg: #faeeda; --warn-text: #633806;
+    --danger-bg: #fcebeb; --danger-text: #791f1f;
+    --radius: 8px; --radius-lg: 12px;
+    --red: #A32D2D; --amber: #BA7517; --green: #3B6D11; --gray: #888780;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
+      --text: #e8e8e2; --text2: #a0a09a; --text3: #6a6a65;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+      --info-bg: #042c53; --info-text: #85b7eb; --info-border: #185fa5;
+      --success-bg: #173404; --success-text: #c0dd97;
+      --warn-bg: #412402; --warn-text: #fac775;
+      --danger-bg: #501313; --danger-text: #f09595;
+      --red: #f09595; --amber: #fac775; --green: #97c459; --gray: #b4b2a9;
+    }
+  }
+  html { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; background: var(--bg3); color: var(--text); }
+  body { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 3rem; background: var(--bg3); }
+
+  h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; }
+  .sec-label { font-size: 10px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); margin-bottom: .6rem; }
+  .section { margin-bottom: 2rem; }
+
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+  .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .met { background: var(--bg2); border-radius: var(--radius); padding: 12px 14px; }
+  .met-l { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .met-v { font-size: 20px; font-weight: 500; }
+
+  .funnel { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0; margin-bottom: 1rem; }
+  .fstep { border: 0.5px solid var(--border); padding: 12px 14px; background: var(--bg); cursor: pointer; }
+  .fstep:first-child { border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
+  .fstep:last-child { border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+  .fstep + .fstep { border-left: none; }
+  .fstep:hover { background: var(--bg2); }
+  .fstep.active { background: var(--info-bg); border-color: var(--info-border); }
+  .fstep-icon { font-size: 18px; margin-bottom: 6px; color: var(--text2); }
+  .fstep.active .fstep-icon { color: var(--info-text); }
+  .fstep-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .fstep-sub { font-size: 11px; color: var(--text2); }
+  .fstep.active .fstep-sub { color: var(--info-text); }
+
+  .stage-panel { display: none; }
+  .stage-panel.visible { display: block; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .three-col { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+
+  .signal-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .signal-row:last-child { border-bottom: none; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .dot-red { background: var(--red); }
+  .dot-amber { background: var(--amber); }
+  .dot-green { background: var(--green); }
+  .sig-text { font-size: 13px; line-height: 1.5; flex: 1; }
+  .sig-label { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+  .good-bad { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+
+  .priority-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+  .priority-item:last-child { border-bottom: none; }
+  .rank { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; margin-top: 1px; }
+  .r1,.r2 { background: var(--danger-bg); color: var(--danger-text); }
+  .r3,.r4 { background: var(--warn-bg); color: var(--warn-text); }
+  .r5,.r6 { background: var(--success-bg); color: var(--success-text); }
+  .pi-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .pi-desc { font-size: 12px; color: var(--text2); line-height: 1.55; }
+  .pi-meta { font-size: 11px; margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 3px; }
+  .tag-red { background: var(--danger-bg); color: var(--danger-text); }
+  .tag-amber { background: var(--warn-bg); color: var(--warn-text); }
+  .tag-green { background: var(--success-bg); color: var(--success-text); }
+  .tag-blue { background: var(--info-bg); color: var(--info-text); }
+  .week-badge { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 500; margin-left: 5px; vertical-align: middle; }
+  .w1 { background: var(--danger-bg); color: var(--danger-text); }
+  .w2 { background: var(--warn-bg); color: var(--warn-text); }
+  .w3 { background: var(--success-bg); color: var(--success-text); }
+
+  .filter-btns { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+  .filter-btns button { font-size: 12px; padding: 5px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); cursor: pointer; }
+  .filter-btns button:hover { background: var(--bg2); }
+  .filter-btns button.active { background: var(--info-bg); color: var(--info-text); border-color: var(--info-border); }
+
+  .store-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  .sg-card { background: var(--bg2); border-radius: var(--radius); padding: 10px 12px; }
+  .sg-name { font-size: 12px; font-weight: 500; margin-bottom: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sg-stats { display: flex; gap: 10px; font-size: 11px; color: var(--text2); }
+  .bar-mini { height: 4px; border-radius: 2px; background: var(--bg3); margin-top: 5px; }
+  .bar-fill { height: 4px; border-radius: 2px; }
+
+  .divider { height: 0.5px; background: var(--border); margin: 1rem 0; }
+  .chart-wrap { position: relative; width: 100%; }
+  .store-note { font-size: 11px; color: var(--text3); margin-top: 8px; }
+
+  .updated-tag { font-size: 11px; color: var(--text3); float: right; margin-top: 4px; }
+
+  @media (max-width: 600px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .funnel { grid-template-columns: repeat(2, 1fr); }
+    .fstep:nth-child(2) { border-left: 0.5px solid var(--border); }
+    .fstep:nth-child(3) { border-top: none; }
+    .fstep:nth-child(1) { border-radius: var(--radius-lg) 0 0 0; }
+    .fstep:nth-child(2) { border-radius: 0 var(--radius-lg) 0 0; }
+    .fstep:nth-child(3) { border-radius: 0 0 0 var(--radius-lg); }
+    .fstep:nth-child(4) { border-radius: 0 0 var(--radius-lg) 0; }
+    .two-col, .good-bad { grid-template-columns: 1fr; }
+    .three-col { grid-template-columns: 1fr; }
+    .store-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Staples store dashboard</h1>
+<div class="subtitle">
+  J24 network · Bengaluru · GPS (sales) &amp; GPT (bills) · Apr → May 2026
+  <span class="updated-tag">Last updated: May 16, 2026</span>
+</div>
+
+<div class="section">
+  <div class="sec-label">What is happening — Apr to May MTD</div>
+  <div class="metrics">
+    <div class="met"><div class="met-l">Network GPS drop</div><div class="met-v" style="color:var(--red)">−39%</div></div>
+    <div class="met"><div class="met-l">Bill count drop</div><div class="met-v" style="color:var(--red)">−45%</div></div>
+    <div class="met"><div class="met-l">Avg basket (ATV)</div><div class="met-v" style="color:var(--green)">+10%</div></div>
+    <div class="met"><div class="met-l">Stores in degrowth</div><div class="met-v">62 / 62</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-label">Customer journey — where the fall begins (click each stage)</div>
+  <div class="funnel">
+    <div class="fstep active" id="fs0" onclick="showStage(0)">
+      <div class="fstep-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
+      <div class="fstep-title">Customer visits</div>
+      <div class="fstep-sub">Bills down −45%</div>
+    </div>
+    <div class="fstep" id="fs1" onclick="showStage(1)">
+      <div class="fstep-icon"><i class="ti ti-shopping-cart" aria-hidden="true"></i></div>
+      <div class="fstep-title">Cart size</div>
+      <div class="fstep-sub">ATV up +10%</div>
+    </div>
+    <div class="fstep" id="fs2" onclick="showStage(2)">
+      <div class="fstep-icon"><i class="ti ti-package" aria-hidden="true"></i></div>
+      <div class="fstep-title">Category choice</div>
+      <div class="fstep-sub">Rice −34%, Spices −46%</div>
+    </div>
+    <div class="fstep" id="fs3" onclick="showStage(3)">
+      <div class="fstep-icon"><i class="ti ti-repeat" aria-hidden="true"></i></div>
+      <div class="fstep-title">Repeat behaviour</div>
+      <div class="fstep-sub">Frequency falling</div>
+    </div>
+  </div>
+
+  <div class="card stage-panel visible" id="stage0">
+    <div class="two-col">
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px">What the data says</div>
+        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Bill count dropped 45% network-wide Apr→May. Every single store lost footfall.</div><div class="sig-label">Strongest signal in the data</div></div></div>
+        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">May is only half-done (data to May 16). Even at full-month pace, degrowth is structural vs Mar peak of ₹81.8L.</div><div class="sig-label">Apr ₹71.1L → May run-rate ~₹55L</div></div></div>
+        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">5 new stores only exist in May — pulling Apr baseline down artificially in comparison.</div><div class="sig-label">Arushi, Kashvi, One9, Prime, S R G Honkan, Santhosh</div></div></div>
+        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Customers who do visit are spending 10% more per trip — loyalty is intact, this is a frequency problem not a preference problem.</div><div class="sig-label">ATV up from ₹68 → ₹75 avg</div></div></div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px">Why footfall fell</div>
+        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Seasonality: May is a low-stocking month. Consumers buy less rice, atta, dal in summer — they run through stocks slower.</div><div class="sig-label">Explains ~50–60% of the drop</div></div></div>
+        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Month-to-date effect: May 16 is day 16 of 31. A flat month would still show ~48% of April at this point.</div><div class="sig-label">Baseline math — not all "drop" is real yet</div></div></div>
+        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Some stores show sudden collapse — Shiva Ganga −77%, Sathish −60% — suggesting local disruption: stock outage, operational issue, or new competitor.</div><div class="sig-label">Needs store-level investigation</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card stage-panel" id="stage1">
+    <div class="two-col">
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px">What the data says</div>
+        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Average transaction value rose +10% network-wide — from ₹68/bill in April to ₹75/bill in May.</div><div class="sig-label">Positive signal: loyal customers spend more</div></div></div>
+        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">17 stores show ATV up more than 10%: Gajanana (+38%), Purva Riviera (+33%), KSFC Layout (+16%), Victorian View (+19%).</div><div class="sig-label">These stores are upselling effectively</div></div></div>
+        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">6 stores show ATV falling too — Shiva Ganga −62%, Shree Lakshmi −34%, Sri Mahadeshwara −28%. Both footfall AND spend collapsing.</div><div class="sig-label">Double stress — requires urgent attention</div></div></div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px">What this means for customers</div>
+        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Customers who return are buying slightly larger quantities or bigger pack sizes. This is a healthy sign of trust in the store.</div></div></div>
+        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Rising ATV partly masks the frequency loss — GPS looks less bad than the bill count suggests. Don't be complacent about this.</div></div></div>
+        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">For double-stress stores, even returning customers are buying less — suggests assortment gap, pricing concern, or poor experience.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card stage-panel" id="stage2">
+    <div style="font-size:13px;font-weight:500;margin-bottom:10px">GPS drop by category — contribution to total ₹28L degrowth</div>
+    <div class="chart-wrap" style="height:240px">
+      <canvas id="catChart" role="img" aria-label="Horizontal bar chart of GPS drop by category">Rice ₹10L, Spices ₹5L, Pulses ₹4L, Flours ₹3.5L, Sugar ₹2.1L, Dry Fruits ₹1.4L, Whole Spices ₹1.1L, Salt ₹0.9L</canvas>
+    </div>
+    <div class="divider"></div>
+    <div class="three-col" style="margin-top:8px">
+      <div><div style="font-size:12px;font-weight:500;margin-bottom:5px;color:var(--red)">High alarm</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Rice −34% GPS<br>Spices −46%<br>= 53% of all lost revenue</div></div>
+      <div><div style="font-size:12px;font-weight:500;margin-bottom:5px;color:var(--amber)">Watch</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Pulses −40%<br>Flours −42%<br>= 31% of all lost revenue</div></div>
+      <div><div style="font-size:12px;font-weight:500;margin-bottom:5px;color:var(--green)">Stable-ish</div><div style="font-size:12px;color:var(--text2);line-height:1.7">Whole Grains −19%<br>Holding better than others<br>Small base though</div></div>
+    </div>
+  </div>
+
+  <div class="card stage-panel" id="stage3">
+    <div class="two-col">
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px">Repeat customer signals</div>
+        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Bill frequency per store is down ~45% — customers who typically ordered 2–3x/month may have ordered once in May so far.</div></div></div>
+        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Staples are monthly/bi-monthly purchases. Some of the May drop is "not yet re-ordered" — some will return later in the month.</div></div></div>
+        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Stores with high ATV and moderate bill drop (Gajanana, JHBCS, Sai Sakshik) suggest their loyal customers are still active, just buying less often.</div></div></div>
+        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Stores with both bill drop AND ATV drop risk losing customers permanently — they may be switching to a competitor or modern retail.</div></div></div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px">Retention risk by pattern</div>
+        <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">At-risk stores: Shiva Ganga, Sathish, Nanjundeshwara — bill count and spend both collapsing. Customers may be churning.</div><div class="sig-label">Needs immediate re-engagement</div></div></div>
+        <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Frequency dip stores: most of the network — customers taking longer gap between orders due to seasonality. Win-back campaigns will work here.</div><div class="sig-label">~45 stores in this bucket</div></div></div>
+        <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Stable base stores: Gajanana, Suvarna, Sai Sakshik — holding loyalty, ATV growing. Protect these and learn from them.</div><div class="sig-label">Double down on retention here</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-label">What is good vs what is not</div>
+  <div class="good-bad">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><i class="ti ti-circle-check" style="color:var(--green);font-size:16px" aria-hidden="true"></i><span style="font-size:13px;font-weight:500">Working well</span></div>
+      <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Basket size is up — loyal customers trust the assortment and are buying more per trip</div></div></div>
+      <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">Gajanana, Suvarna, Sai Sakshik holding GPS decline to &lt;37% while others bleed 50–77%</div></div></div>
+      <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">5 new stores onboarded in May — network is still growing</div></div></div>
+      <div class="signal-row"><div class="dot dot-green"></div><div><div class="sig-text">JHBCS and Neeladri Road are large stores holding ATV stable — strong anchor customer base</div></div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><i class="ti ti-alert-triangle" style="color:var(--red);font-size:16px" aria-hidden="true"></i><span style="font-size:13px;font-weight:500">Needs fixing</span></div>
+      <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">6 stores losing both footfall AND basket size — double stress, churn risk is real</div></div></div>
+      <div class="signal-row"><div class="dot dot-red"></div><div><div class="sig-text">Rice alone = ₹10L of ₹28L total drop. No category-specific retention plan visible</div></div></div>
+      <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">Stores like Sri Siddappaji saw Apr drop 46% vs Mar — already weak before May started</div></div></div>
+      <div class="signal-row"><div class="dot dot-amber"></div><div><div class="sig-text">No store shows growth — even best performers are just "less bad". No outlier pulling the network up</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-label">Problems to tackle — customer-first priority order</div>
+  <div class="card">
+
+    <div class="priority-item">
+      <div class="rank r1">1</div>
+      <div>
+        <div class="pi-title">Stop the bleed at 6 double-stress stores <span class="week-badge w1">This week</span></div>
+        <div class="pi-desc">Shiva Ganga (−77%), Sathish (−60%), Nanjundeshwara (−60%), Rishan (−59%), Sri RAGHAVENDRA (−58%), Sri Krishnagururaya (−57%) are losing both visits AND spend. These customers are leaving, not just pausing.</div>
+        <div class="pi-meta"><span class="tag tag-red">Churn risk</span><span class="tag tag-red">₹4.8L combined Apr GPS</span><span class="tag tag-blue">Action: WhatsApp reactivation + combo deal today</span></div>
+      </div>
+    </div>
+
+    <div class="priority-item">
+      <div class="rank r2">2</div>
+      <div>
+        <div class="pi-title">Fix Rice availability and pricing across all stores <span class="week-badge w1">This week</span></div>
+        <div class="pi-desc">Rice is ₹10L of the ₹28L drop — 35% of all degrowth. At 53 stores, Rice is the single biggest bleeding category. Customers who stop buying rice stop visiting altogether. Verify stock, check if pricing drifted vs local competition.</div>
+        <div class="pi-meta"><span class="tag tag-red">35% of total drop</span><span class="tag tag-amber">Check: stock gaps, price parity</span></div>
+      </div>
+    </div>
+
+    <div class="priority-item">
+      <div class="rank r3">3</div>
+      <div>
+        <div class="pi-title">Run re-engagement campaign for frequency-lapsed customers <span class="week-badge w2">Week 2</span></div>
+        <div class="pi-desc">45 stores have footfall down 40–60% but ATV is stable or rising — these customers haven't left, they just haven't re-ordered yet. A WhatsApp push or reorder discount will win most of them back this month.</div>
+        <div class="pi-meta"><span class="tag tag-amber">Frequency drop</span><span class="tag tag-blue">~40 stores eligible</span><span class="tag tag-blue">Action: WhatsApp broadcast by store</span></div>
+      </div>
+    </div>
+
+    <div class="priority-item">
+      <div class="rank r4">4</div>
+      <div>
+        <div class="pi-title">Build basket with combo packs on Pulses + Flours + Spices <span class="week-badge w2">Week 2</span></div>
+        <div class="pi-desc">Customers who do visit are spending 10% more — they're receptive to buying more per trip. Pulses and Flours together account for ₹7.6L of the drop. A dal+atta combo or masalas bundle deal can recover both categories in one action.</div>
+        <div class="pi-meta"><span class="tag tag-amber">₹7.6L at stake</span><span class="tag tag-blue">Bundle: rice+dal, atta+oil, masala sets</span></div>
+      </div>
+    </div>
+
+    <div class="priority-item">
+      <div class="rank r5">5</div>
+      <div>
+        <div class="pi-title">Identify and protect best-performing stores <span class="week-badge w3">Week 3</span></div>
+        <div class="pi-desc">Gajanana (−27%), Suvarna (−24.5%), Purva Riviera (−31%), Shree Siddhalingeshwara (−31%) are significantly outperforming the network. Understand why — better stock, manager quality, local loyalty — and replicate those practices.</div>
+        <div class="pi-meta"><span class="tag tag-green">Best performers</span><span class="tag tag-blue">Action: store visit + learnings doc</span></div>
+      </div>
+    </div>
+
+    <div class="priority-item">
+      <div class="rank r6">6</div>
+      <div>
+        <div class="pi-title">Set May end-of-month GPS recovery target <span class="week-badge w3">Week 3</span></div>
+        <div class="pi-desc">May MTD (₹43L as of day 16) needs to reach ₹70–75L by May 31 to match April. That means doubling the current pace in the second half. Set store-level targets, track daily, escalate by day 22 if off-track.</div>
+        <div class="pi-meta"><span class="tag tag-green">Planning</span><span class="tag tag-blue">Need ₹27–32L more in 15 days</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <div class="sec-label">Store view — filter by urgency</div>
+  <div class="filter-btns" id="filterBtns">
+    <button onclick="filterStores('critical')" id="fb-critical">Critical (6)</button>
+    <button onclick="filterStores('at-risk')" id="fb-at-risk">High risk (20)</button>
+    <button onclick="filterStores('moderate')" id="fb-moderate">Moderate (30)</button>
+    <button onclick="filterStores('stable')" id="fb-stable">Best performing (4)</button>
+  </div>
+  <div id="storeGrid"></div>
+  <div class="store-note" id="storeNote"></div>
+</div>
+
+<script>
+const STORES = [
+  {n:"Shiva Ganga",gps:-77.0,gpt:-38.9,atv:-62.4,type:"critical"},
+  {n:"Sathish",gps:-59.9,gpt:-52.1,atv:-16.1,type:"critical"},
+  {n:"Nanjundeshwara",gps:-59.8,gpt:-56.7,atv:-7.3,type:"critical"},
+  {n:"Rishan",gps:-59.4,gpt:-58.4,atv:-2.4,type:"critical"},
+  {n:"Sri RAGHAVENDRA",gps:-58.4,gpt:-54.6,atv:-8.4,type:"critical"},
+  {n:"Sri Krishnagururaya",gps:-57.0,gpt:-54.7,atv:-5.1,type:"critical"},
+  {n:"Aadhya",gps:-56.3,gpt:-57.8,atv:3.6,type:"at-risk"},
+  {n:"Horamavu Nandanam",gps:-56.4,gpt:-51.8,atv:-9.6,type:"at-risk"},
+  {n:"Sogasu",gps:-56.3,gpt:-56.1,atv:-0.6,type:"at-risk"},
+  {n:"Springfields",gps:-56.2,gpt:-49.2,atv:-13.8,type:"at-risk"},
+  {n:"Shree Lakshmi",gps:-54.5,gpt:-31.6,atv:-33.5,type:"at-risk"},
+  {n:"Om Shakthi",gps:-54.5,gpt:-48.0,atv:-12.6,type:"at-risk"},
+  {n:"R G ESSENTIALS",gps:-54.9,gpt:-48.2,atv:-13.1,type:"at-risk"},
+  {n:"Sanju",gps:-54.8,gpt:-45.0,atv:-17.8,type:"at-risk"},
+  {n:"Lashwik",gps:-54.2,gpt:-50.5,atv:-7.4,type:"at-risk"},
+  {n:"Sri Venkateshwara",gps:-53.2,gpt:-54.5,atv:2.8,type:"at-risk"},
+  {n:"SRINIDHI",gps:-53.1,gpt:-47.5,atv:-10.9,type:"at-risk"},
+  {n:"Sri Kala Bhairava",gps:-52.1,gpt:-51.9,atv:-0.4,type:"at-risk"},
+  {n:"Celebrity Paradise",gps:-50.8,gpt:-47.3,atv:-6.6,type:"at-risk"},
+  {n:"Arvind sporcia",gps:-50.7,gpt:-42.4,atv:-14.4,type:"at-risk"},
+  {n:"Sumukha",gps:-51.4,gpt:-56.4,atv:11.4,type:"at-risk"},
+  {n:"Sri Govindalakshmi",gps:-49.6,gpt:-49.8,atv:0.3,type:"at-risk"},
+  {n:"Shri Lakshminarashimha",gps:-49.1,gpt:-48.6,atv:-1.0,type:"at-risk"},
+  {n:"Laxmi Venkateshwara",gps:-47.5,gpt:-50.3,atv:5.6,type:"moderate"},
+  {n:"Garima",gps:-47.6,gpt:-50.3,atv:5.3,type:"moderate"},
+  {n:"Shri Shiva Shakti",gps:-47.0,gpt:-52.6,atv:11.8,type:"moderate"},
+  {n:"Shree Shambavi",gps:-46.8,gpt:-46.1,atv:-1.2,type:"moderate"},
+  {n:"BTM Layout",gps:-46.9,gpt:-48.6,atv:3.4,type:"moderate"},
+  {n:"Hoysala Nagar",gps:-46.2,gpt:-41.8,atv:-7.5,type:"moderate"},
+  {n:"Maruthi Layout",gps:-46.4,gpt:-50.6,atv:8.6,type:"moderate"},
+  {n:"Thindlu",gps:-49.6,gpt:-49.6,atv:0.1,type:"moderate"},
+  {n:"Saroja",gps:-49.4,gpt:-56.8,atv:17.0,type:"moderate"},
+  {n:"Rajarajeshwari",gps:-38.4,gpt:-48.5,atv:19.7,type:"moderate"},
+  {n:"Bhagya",gps:-44.8,gpt:-45.1,atv:0.6,type:"moderate"},
+  {n:"Chareeksha",gps:-42.2,gpt:-50.9,atv:17.5,type:"moderate"},
+  {n:"Yelahanka",gps:-42.3,gpt:-46.0,atv:6.9,type:"moderate"},
+  {n:"Shreyas",gps:-40.3,gpt:-48.3,atv:15.5,type:"moderate"},
+  {n:"RAGHAVA",gps:-45.7,gpt:-44.3,atv:-2.4,type:"moderate"},
+  {n:"SLV",gps:-37.3,gpt:-30.6,atv:-9.7,type:"moderate"},
+  {n:"KSFC Layout",gps:-38.0,gpt:-46.6,atv:16.1,type:"moderate"},
+  {n:"Pragati",gps:-38.9,gpt:-42.5,atv:6.1,type:"moderate"},
+  {n:"Sowmya",gps:-38.5,gpt:-44.6,atv:11.1,type:"moderate"},
+  {n:"Victorian View",gps:-36.5,gpt:-46.8,atv:19.4,type:"moderate"},
+  {n:"Shri Annapoorneshwari",gps:-34.8,gpt:-38.8,atv:6.6,type:"moderate"},
+  {n:"Sri Siddappaji",gps:-37.9,gpt:-45.5,atv:13.9,type:"moderate"},
+  {n:"Neeladri Road",gps:-36.7,gpt:-36.9,atv:0.4,type:"moderate"},
+  {n:"JHBCS Layout",gps:-36.1,gpt:-40.0,atv:6.5,type:"moderate"},
+  {n:"Sai Sakshik",gps:-36.5,gpt:-46.3,atv:18.4,type:"moderate"},
+  {n:"Sri Mahadeshwara",gps:-36.2,gpt:-10.9,atv:-28.4,type:"moderate"},
+  {n:"Likith",gps:-48.0,gpt:-48.9,atv:1.6,type:"moderate"},
+  {n:"Vinayaka",gps:-38.2,gpt:-42.2,atv:7.0,type:"moderate"},
+  {n:"Shree Raghavendra",gps:-44.4,gpt:-44.4,atv:0.1,type:"moderate"},
+  {n:"Srikanteshwara",gps:-44.0,gpt:-43.2,atv:-1.4,type:"moderate"},
+  {n:"Sri Ganeshwara",gps:-45.1,gpt:-46.1,atv:1.8,type:"moderate"},
+  {n:"Pranav",gps:-43.7,gpt:-48.7,atv:9.6,type:"moderate"},
+  {n:"Bren Avalon",gps:-43.6,gpt:-35.8,atv:-12.1,type:"moderate"},
+  {n:"Bhuvaneshwari 2",gps:-44.6,gpt:-46.9,atv:4.5,type:"moderate"},
+  {n:"Shree Siddhalingeshwara",gps:-31.3,gpt:-41.8,atv:18.1,type:"stable"},
+  {n:"Purva Riviera",gps:-31.2,gpt:-48.4,atv:33.3,type:"stable"},
+  {n:"Gajanana",gps:-26.9,gpt:-47.0,atv:38.0,type:"stable"},
+  {n:"Suvarna",gps:-24.5,gpt:-38.0,atv:21.9,type:"stable"}
+];
+
+const NOTES = {
+  critical:"6 stores with both bill count AND basket spend falling hard. Churn risk is high — these customers may be switching to competitors. Call or WhatsApp each store today.",
+  "at-risk":"20 stores with 50–57% GPS drop driven mainly by footfall loss. ATV is mostly stable — loyal customers still spend well when they visit. Win them back with a reorder push.",
+  moderate:"30 stores: GPS down 36–50%, primarily seasonal footfall loss. ATV often rising. These customers are still yours — nudge them to reorder with a WhatsApp campaign.",
+  stable:"4 best performers: GPS drop under 32%, several with rising ATV. Study what they do differently and replicate across the network."
+};
+
+const COLORS = {critical:"#A32D2D","at-risk":"#BA7517",moderate:"#888780",stable:"#3B6D11"};
+
+function filterStores(type) {
+  document.querySelectorAll('.filter-btns button').forEach(b => b.classList.remove('active'));
+  document.getElementById('fb-'+type).classList.add('active');
+  const list = STORES.filter(s => s.type === type);
+  const c = COLORS[type];
+  document.getElementById('storeGrid').innerHTML = '<div class="store-grid">' +
+    list.map(s => {
+      const bw = Math.min(100, Math.abs(s.gps));
+      const atvColor = s.atv < -5 ? '#A32D2D' : s.atv > 5 ? '#3B6D11' : 'var(--text3)';
+      return `<div class="sg-card">
+        <div class="sg-name">${s.n}</div>
+        <div class="sg-stats">
+          <span style="color:${c};font-weight:500">${s.gps.toFixed(0)}% GPS</span>
+          <span>${s.gpt.toFixed(0)}% bills</span>
+          <span style="color:${atvColor}">${s.atv > 0 ? '+' : ''}${s.atv.toFixed(0)}% ATV</span>
+        </div>
+        <div class="bar-mini"><div class="bar-fill" style="width:${bw}%;background:${c}"></div></div>
+      </div>`;
+    }).join('') + '</div>';
+  document.getElementById('storeNote').textContent = NOTES[type];
+}
+
+function showStage(n) {
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('fs'+i).classList.toggle('active', i === n);
+    const p = document.getElementById('stage'+i);
+    p.classList.toggle('visible', i === n);
+    p.style.display = i === n ? 'block' : 'none';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  filterStores('critical');
+  new Chart(document.getElementById('catChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Rice & Rice','Grnd Spices','Pulses','Flours & Sooji','Sugar & Jaggery','Dry Fruits','Whole Spices','Salt'],
+      datasets: [{
+        label: 'GPS drop (₹L)',
+        data: [10.0, 5.0, 4.0, 3.5, 2.1, 1.4, 1.1, 0.9],
+        backgroundColor: ['#A32D2D','#A32D2D','#BA7517','#BA7517','#BA7517','#888780','#888780','#888780'],
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ₹' + ctx.raw.toFixed(1) + 'L lost' } } },
+      scales: {
+        x: { ticks: { callback: v => '₹' + v + 'L', font: { size: 11 } }, grid: { color: 'rgba(128,128,128,0.1)' } },
+        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
